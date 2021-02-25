@@ -9,7 +9,8 @@ start:
 	call check_cpuid
 	call check_long_mode
 
-
+	call setup_page_tables
+	call enable_paging
 	;print 'OK'
 	mov dword [0xb8000], 0x2f4b2f4f
 	hlt
@@ -63,6 +64,49 @@ check_long_mode:
 	mov al, "L"
 	jmp error
 
+setup_page_tables:
+	mov eax, page_table_l3
+	or eax, 0b11 ;present, writable
+	mov [page_table_l4], eax
+
+	mov eax, page_table_l2
+	or eax, 0b11 ;present, writable
+	mov [page_table_l3], eax
+
+	mov ecx, 0
+.loop:
+	mov eax, 0x200000
+	mul ecx
+	or eax, 0b10000011 ;present, writable, huge page
+	mov [page_table_l2 + ecx * 8], eax
+	inc ecx ;increment counter
+	cmp ecx, 512 ;check if whole table is mapped
+	jne .loop
+
+	ret
+
+enable_paging:
+	mov eax, page_table_l4
+	mov cr3, eax
+
+	;enable PAE
+	mov eax, cr4
+	or eax, 1 << 5
+	mov cr4, eax
+
+	;enable long mode
+	mov ecx, 0xc0000080
+	rdmsr
+	or eax, 1 << 8
+	wrmsr
+
+	;enable paging
+	mov eax, cr0
+	or eax, 1 << 31
+	mov cr0, eax
+
+	ret
+
 error:
 	;print "ERR: X"
 	mov dword [0xb8000], 0x4f524f45
@@ -72,6 +116,13 @@ error:
 	hlt
 
 section .bss
+align 4096
+page_table_l4:
+	resb 4096
+page_table_l3:
+	resb 4096
+page_table_l2:
+	resb 4096
 stack_bottom:
 	resb 4096 * 4
 stack_top:
