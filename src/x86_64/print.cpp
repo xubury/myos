@@ -31,7 +31,7 @@ void Printer::printNewline() {
     for (size_t row = 1; row < NUM_ROWS; ++row) {
         for (size_t col = 0; col < NUM_COLS; ++col) {
             Char character = m_buffer[col + NUM_COLS * row];
-            m_buffer[col + NUM_ROWS * (row - 1)] = character;
+            m_buffer[col + NUM_COLS * (row - 1)] = character;
         }
     }
 
@@ -41,20 +41,18 @@ void Printer::printNewline() {
 void Printer::printChar(char character) {
     if (character == '\n') {
         printNewline();
+    } else {
+        if (m_col >= NUM_COLS) {
+            printNewline();
+        }
+        m_buffer[m_col + NUM_COLS * m_row] = Char(character, m_color);
+        ++m_col;
     }
-
-    if (m_col > NUM_COLS) {
-        printNewline();
-    }
-
-    m_buffer[m_col + NUM_COLS * m_row] = Char(character, m_color);
-
-    ++m_col;
 }
 
 void Printer::printStr(const char *str) {
     for (size_t i = 0; 1; ++i) {
-        char character = (uint8_t)str[i];
+        char character = str[i];
 
         if (character == '\0') {
             return;
