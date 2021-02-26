@@ -30,7 +30,7 @@ void Printer::printNewline() {
 
     for (size_t row = 1; row < NUM_ROWS; ++row) {
         for (size_t col = 0; col < NUM_COLS; ++col) {
-            struct Char character = m_buffer[col + NUM_COLS * row];
+            Char character = m_buffer[col + NUM_COLS * row];
             m_buffer[col + NUM_ROWS * (row - 1)] = character;
         }
     }
