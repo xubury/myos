@@ -1,21 +1,21 @@
-kernel_source_files := $(shell find src/kernel -name *.c)
-kernel_object_files := $(patsubst src/kernel/%.c, build/kernel/%.o, $(kernel_source_files))
+kernel_source_files := $(shell find src/kernel -name *.cpp)
+kernel_object_files := $(patsubst src/kernel/%.cpp, build/kernel/%.o, $(kernel_source_files))
 
-x86_64_c_source_files := $(shell find src/x86_64 -name *.c)
-x86_64_c_object_files := $(patsubst src/x86_64/%.c, build/x86_64/%.o, $(x86_64_c_source_files))
+x86_64_c_source_files := $(shell find src/x86_64 -name *.cpp)
+x86_64_c_object_files := $(patsubst src/x86_64/%.cpp, build/x86_64/%.o, $(x86_64_c_source_files))
 
 x86_64_asm_source_files := $(shell find src/x86_64 -name *.asm)
 x86_64_asm_object_files := $(patsubst src/x86_64/%.asm, build/x86_64/%.o, $(x86_64_asm_source_files))
 
 x86_64_object_files := $(x86_64_c_object_files) $(x86_64_asm_object_files)
 
-$(kernel_object_files) : build/kernel/%.o : src/kernel/%.c
+$(kernel_object_files) : build/kernel/%.o : src/kernel/%.cpp
 	mkdir -p $(dir $@) && \
-	x86_64-elf-gcc -c -I src/include -ffreestanding $(patsubst build/kernel/%.o, src/kernel/%.c, $@) -o $@
+	x86_64-elf-gcc -c -I src/include -ffreestanding $(patsubst build/kernel/%.o, src/kernel/%.cpp, $@) -o $@
 
-$(x86_64_c_object_files) : build/x86_64/%.o : src/x86_64/%.c
+$(x86_64_c_object_files) : build/x86_64/%.o : src/x86_64/%.cpp
 	mkdir -p $(dir $@) && \
-	x86_64-elf-gcc -c -I src/include -ffreestanding $(patsubst build/x86_64/%.o, src/x86_64/%.c, $@) -o $@
+	x86_64-elf-gcc -c -I src/include -ffreestanding $(patsubst build/x86_64/%.o, src/x86_64/%.cpp, $@) -o $@
 
 $(x86_64_asm_object_files) : build/x86_64/%.o : src/x86_64/%.asm
 	mkdir -p $(dir $@) && \
