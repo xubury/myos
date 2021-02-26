@@ -52,7 +52,7 @@ void Printer::printChar(char character) {
     ++m_col;
 }
 
-void Printer::printStr(char *str) {
+void Printer::printStr(const char *str) {
     for (size_t i = 0; 1; ++i) {
         char character = (uint8_t)str[i];
 

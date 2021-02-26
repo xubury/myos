@@ -35,7 +35,7 @@ class Printer {
    public:
     static void printClear();
     static void printChar(char character);
-    static void printStr(char *str);
+    static void printStr(const char *str);
     static void printSetColor(uint8_t foreground, uint8_t background);
 
    private:
