@@ -1,14 +1,14 @@
-#include "print.hpp"
+#include "VGABuffer.hpp"
 
 extern "C" {
 
 void kernel_main() {
-    Printer::printClear();
-    Printer::printSetColor(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
-    Printer::printStr("Welcome to my kernel!\n");
-    Printer::printSetColor(PRINT_COLOR_LIGHT_BLUE, PRINT_COLOR_BLACK);
-    Printer::printStr("Test different color.\n");
-    Printer::printSetColor(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
+    VGA::printClear();
+    VGA::printSetColor(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
+    VGA::printStr("Welcome to my kernel!\n");
+    VGA::printSetColor(PRINT_COLOR_LIGHT_BLUE, PRINT_COLOR_BLACK);
+    VGA::printStr("Test different color.\n");
+    VGA::printSetColor(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
     const char *str =
         "Test long string\n"
         "line1..\n"
@@ -39,6 +39,6 @@ void kernel_main() {
         "abcdefghijklmnopqrstuvwxyz0123456789+-*/"
         "abcdefghijklmnopqrstuvwxyz0123456789+-*/"
         "abcdefghijklmnopqrstuvwxyz0123456789+-*/";
-    Printer::printStr(str);
+    VGA::printStr(str);
 }
 }

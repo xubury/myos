@@ -1,5 +1,5 @@
-#ifndef PRINT_HPP
-#define PRINT_HPP
+#ifndef VGA_BUFFER_HPP
+#define VGA_BUFFER_HPP
 
 #include <stddef.h>
 #include <stdint.h>
@@ -31,7 +31,7 @@ struct Char {
         : character(character), color(color) {}
 };
 
-class Printer {
+class VGA {
    public:
     static void printClear();
     static void printChar(char character);
