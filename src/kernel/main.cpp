@@ -2,7 +2,7 @@
 
 extern "C" {
 
-void kernel_main() {
+void kernelStart() {
     VGA::printClear();
     VGA::printSetColor(PRINT_COLOR_YELLOW, PRINT_COLOR_BLACK);
     VGA::printStr("Welcome to my kernel!\n");
