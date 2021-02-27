@@ -43,8 +43,8 @@ class VGA {
     static void printNewline();
     static Char *m_buffer;
     static uint8_t m_color;
-    static uint8_t m_row;
-    static uint8_t m_col;
+    static size_t m_row;
+    static size_t m_col;
 
     const static size_t NUM_COLS;
     const static size_t NUM_ROWS;

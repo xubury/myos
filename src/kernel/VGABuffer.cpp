@@ -5,8 +5,8 @@ const size_t VGA::NUM_ROWS = 25;
 
 Char *VGA::m_buffer = (Char *)0xb8000;
 uint8_t VGA::m_color = PRINT_COLOR_WHITE + (PRINT_COLOR_BLACK << 4);
-uint8_t VGA::m_row = 0;
-uint8_t VGA::m_col = 0;
+size_t VGA::m_row = 0;
+size_t VGA::m_col = 0;
 
 void VGA::clearRow(size_t row) {
     Char empty;
