@@ -1,1 +1,1 @@
-int _start() { return 123; }
+extern "C" int _start() { return 123; }

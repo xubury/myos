@@ -22,7 +22,7 @@ boot_object_files := $(patsubst %.c, $(BUILD_DIR)/boot/%.o, $(boot_source_files)
 
 $(boot_object_files): $(BUILD_DIR)/boot/%.o : %.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) \
+	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) -I/usr/include \
 	$(patsubst $(BUILD_DIR)/boot/%.o, %.c, $@) -o $@
 
 $(boot_so): $(boot_object_files)
