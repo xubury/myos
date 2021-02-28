@@ -35,7 +35,7 @@ void VGABuffer::print(const char *str) {
 
 void VGABuffer::clearScanline(uint32_t y) {
     uint64_t bytePerScanline = m_frame->pixelsPerScanline * BBP;
-    uint64_t pixPtrBase = (uint64_t)m_frame->baseAddr + (bytePerScanline * y);
+    char *pixPtrBase = (char *)m_frame->baseAddr + (bytePerScanline * y);
     for (uint32_t *pixPtr = (uint32_t *)pixPtrBase;
          pixPtr < (uint32_t *)(pixPtrBase + bytePerScanline); ++pixPtr) {
         *pixPtr = 0;
