@@ -23,13 +23,13 @@ LD_FLAGS=-nostdlib -znocombreloc -T $(GNU_EFI_LINKER) -shared -Bsymbolic \
 boot_efi=$(BUILD_DIR)/main.efi
 boot_so=$(BUILD_DIR)/main.so
 
-kernel_source_files := $(wildcard src/kernel/*.c)
-kernel_object_files := $(patsubst src/kernel/%.c, $(BUILD_DIR)/kernel/%.o, $(kernel_source_files))
+kernel_source_files := $(wildcard src/kernel/*.cpp)
+kernel_object_files := $(patsubst src/kernel/%.cpp, $(BUILD_DIR)/kernel/%.o, $(kernel_source_files))
 
-$(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.c
+$(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
 	mkdir -p $(dir $@) && \
 	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) \
-	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.c, $@) -o $@
+	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
 
 $(BUILD_DIR)/%.so: $(kernel_object_files)
 	$(LD) $(LD_FLAGS) $(kernel_object_files) -o $@ $(GNU_EFI_LIBS)
