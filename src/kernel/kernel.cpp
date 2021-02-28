@@ -1,1 +1,1 @@
-extern "C" void _start() {}
+int _start() { return 123; }

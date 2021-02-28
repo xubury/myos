@@ -30,7 +30,7 @@ $(boot_so): $(boot_object_files)
 
 $(boot_efi): $(boot_so)
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela \
-		-j .reloc --target=efi-app-x86_64 $^ $@
+		-j .rel.* -j .rela.* -j .reloc --target=efi-app-x86_64 $^ $@
 
 .PHONY: img
 img: $(boot_efi)

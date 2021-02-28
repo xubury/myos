@@ -6,7 +6,7 @@ export CC=x86_64-elf-gcc
 export LD=x86_64-elf-ld
 
 
-CXX_FLAGS=-c -ffreestanding -Wall -Wextra -Wundef -pedantic
+CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(wildcard src/kernel/*.cpp)
@@ -19,7 +19,7 @@ $(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
 
 .PHONY: all
 all: $(kernel_object_files)
-	$(LD) $(LD_FLAGS) $(kernel_object_files) -o $(kernel_elf) && \
+	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files) && \
 	$(MAKE) -C boot img
 
 .PHONY: clean
