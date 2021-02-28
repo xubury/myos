@@ -8,9 +8,9 @@ GNU_EFI_CRT_OBJ=$(LIB)/crt0-efi-x86_64.o
 GNU_EFI_LINKER=$(LIB)/elf_x86_64_efi.lds
 GNU_EFI_LIBS=-lgnuefi -lefi
 
-CXX_FLAGS=-c -ffreestanding -Wall -Wextra -Wundef -pedantic \
+CXX_FLAGS=-c -ffreestanding -Wall \
 		  -fpic -fno-stack-protector -fshort-wchar -mno-red-zone \
-		  -DEFI_FUNCTION_WRAPPER -DEFI_DEBUG -DEFI_DEBUG_CLEAR_MEMORY
+		  -DEFI_FUNCTION_WRAPPER
 LD_FLAGS=-nostdlib -znocombreloc -T $(GNU_EFI_LINKER) -shared -Bsymbolic \
 		 -L $(LIB) $(GNU_EFI_CRT_OBJ)
 
@@ -44,6 +44,6 @@ img: $(boot_efi)
 	mcopy -i $(BUILD_DIR)/$(OSNAME).img $(kernel_elf) ::
 
 .PHONY: clean
-clean:$(boot_efi) $(boot_so)
-	rm $(boot_efi) $(boot_so)
+clean:
+	rm $(boot_object_files) $(BUILD_DIR)/$(OSNAME).img $(boot_efi) $(boot_so)
 

@@ -23,8 +23,9 @@ all: $(kernel_object_files)
 	$(MAKE) -C boot img
 
 .PHONY: clean
-clean: $(kernel_elf) $(kernel_object_files)
+clean:
 	rm $(kernel_elf) $(kernel_object_files)
+	make -C boot clean
 
 .PHONY: run
 run:
