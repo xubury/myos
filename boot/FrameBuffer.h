@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 typedef struct {
-    char *baseAddr;
+    void *baseAddr;
     size_t bufferSize;
     uint32_t width;
     uint32_t height;
