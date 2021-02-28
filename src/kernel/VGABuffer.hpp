@@ -4,7 +4,6 @@
 #include "FrameBuffer.h"
 #include "PSF1Font.h"
 
-#define BBP 4
 struct Cursor {
     uint32_t x;
     uint32_t y;
@@ -15,6 +14,8 @@ struct Cursor {
 
 class VGABuffer {
    public:
+    static uint8_t bytesPerPixel;
+
     VGABuffer(FrameBuffer* frameBuffer, PSF1Font* fontBuffer, uint32_t x = 0,
               uint32_t y = 0, uint32_t color = 0xffffffff);
 

@@ -1,5 +1,7 @@
 #include "VGABuffer.hpp"
 
+uint8_t VGABuffer::bytesPerPixel = 4;
+
 VGABuffer::VGABuffer(FrameBuffer *frameBuffer, PSF1Font *fontBuffer, uint32_t x,
                      uint32_t y, uint32_t color)
     : m_frame(frameBuffer), m_font(fontBuffer), m_cursor(x, y, color) {}
@@ -34,11 +36,10 @@ void VGABuffer::print(const char *str) {
 }
 
 void VGABuffer::clearScanline(uint32_t y) {
-    uint64_t bytePerScanline = m_frame->pixelsPerScanline * BBP;
+    uint64_t bytePerScanline = m_frame->pixelsPerScanline * bytesPerPixel;
     char *pixPtrBase = (char *)m_frame->baseAddr + (bytePerScanline * y);
-    for (uint32_t *pixPtr = (uint32_t *)pixPtrBase;
-         pixPtr < (uint32_t *)(pixPtrBase + bytePerScanline); ++pixPtr) {
-        *pixPtr = 0;
+    for (uint32_t x = 0; x < bytePerScanline; x += bytesPerPixel) {
+        *(uint32_t *)(pixPtrBase + x) = 0;
     }
 }
 
