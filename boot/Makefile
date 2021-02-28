@@ -42,6 +42,7 @@ img: $(boot_efi)
 	mcopy -i $(BUILD_DIR)/$(OSNAME).img ./startup.nsh ::
 	mcopy -i $(BUILD_DIR)/$(OSNAME).img $(boot_efi) ::/EFI/BOOT
 	mcopy -i $(BUILD_DIR)/$(OSNAME).img $(kernel_elf) ::
+	mcopy -i $(BUILD_DIR)/$(OSNAME).img $(font_file) ::
 
 .PHONY: clean
 clean:

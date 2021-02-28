@@ -1,5 +1,47 @@
 #include "File.h"
 #include "FrameBuffer.h"
+#include "PSF1Font.h"
+
+#define SUCCESS 0
+#define FAILURE 1
+
+PSF1Font *loadPSF1Font(EFI_FILE *directory, const CHAR16 *path,
+                       EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
+    EFI_FILE *font = loadFile(directory, path, imageHandle, systemTable);
+    if (font == NULL) return NULL;
+
+    PSF1Header *fontHeader = NULL;
+    uint64_t headerSize = sizeof(PSF1Header);
+    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
+                      headerSize, (void **)&fontHeader);
+    uefi_call_wrapper(font->Read, 3, font, &headerSize, fontHeader);
+
+    if (fontHeader->magic[0] != PSF1_MAGIC0 ||
+        fontHeader->magic[1] != PSF1_MAGIC1) {
+        return NULL;
+    }
+
+    uint64_t glyphBufferSize;
+    if (fontHeader->mode == 1) {
+        // 512 glyphmode
+        glyphBufferSize = fontHeader->characterSize * 512;
+    } else {
+        glyphBufferSize = fontHeader->characterSize * 256;
+    }
+
+    void *glyphBuffer;
+    uefi_call_wrapper(font->SetPosition, 2, font, headerSize);
+    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
+                      glyphBufferSize, (void **)&glyphBuffer);
+    uefi_call_wrapper(font->Read, 3, font, &glyphBufferSize, glyphBuffer);
+
+    PSF1Font *finishedFont;
+    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
+                      sizeof(PSF1Font), (void **)&finishedFont);
+    finishedFont->header = fontHeader;
+    finishedFont->glyphBuffer = glyphBuffer;
+    return finishedFont;
+}
 
 FrameBuffer frameBuffer;
 
@@ -38,30 +80,6 @@ int memcmp(const void *aptr, const void *hptr, size_t n) {
     return 0;
 }
 
-uint64_t fileSize(EFI_FILE *FileHandle) {
-    uint64_t ret;
-    EFI_FILE_INFO *FileInfo; /* file information structure */
-    /* get the file's size */
-    FileInfo = LibFileInfo(FileHandle);
-    ret = FileInfo->FileSize;
-    FreePool(FileInfo);
-    return ret;
-}
-
-#define SUCCESS 0
-#define FAILURE 1
-
-void readKernelHeader(EFI_FILE *kernel, Elf64_Ehdr *header) {
-    uint64_t fileInfoSize = 0;
-    uefi_call_wrapper((void *)kernel->GetInfo, 4, kernel, &gEfiFileInfoGuid,
-                      &fileInfoSize, NULL);
-    uint8_t *fileInfo = AllocatePool(fileInfoSize);
-
-    uint64_t headerSize = sizeof(Elf64_Ehdr);
-    uefi_call_wrapper((void *)kernel->Read, 3, kernel, &headerSize, header);
-    FreePool(fileInfo);
-}
-
 uint8_t verifyKernelHeader(Elf64_Ehdr *header) {
     if (memcmp(&header->e_ident[EI_MAG0], ELFMAG, SELFMAG) != 0 ||
         header->e_ident[EI_CLASS] != ELFCLASS64 ||
@@ -73,27 +91,23 @@ uint8_t verifyKernelHeader(Elf64_Ehdr *header) {
     }
 }
 
-EFI_STATUS
-EFIAPI
-efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
-    InitializeLib(imageHandle, systemTable);
-
-    const CHAR16 *filename = L"kernel.elf";
-    EFI_FILE *kernel = loadFile(NULL, filename, imageHandle, systemTable);
-    if (kernel != NULL) {
-        Print(L"Kernel file: %s open successfullly!\n\r", filename);
-    } else {
-        Print(L"Could not open kernel file: %s!\n\r", filename);
-        return EFI_SUCCESS;
-    }
-
+Elf64_Addr loadKernel(EFI_FILE *kernel, EFI_SYSTEM_TABLE *systemTable) {
     // read and verify header.
     Elf64_Ehdr header;
-    readKernelHeader(kernel, &header);
+    uint64_t fileInfoSize = 0;
+    uefi_call_wrapper((void *)kernel->GetInfo, 4, kernel, &gEfiFileInfoGuid,
+                      &fileInfoSize, NULL);
+    uint8_t *fileInfo;
+    uefi_call_wrapper((void *)systemTable->BootServices->AllocatePool, 3,
+                      EfiLoaderData, fileInfoSize, (void **)&fileInfo);
+
+    uint64_t headerSize = sizeof(Elf64_Ehdr);
+    uefi_call_wrapper((void *)kernel->Read, 3, kernel, &headerSize, &header);
     if (verifyKernelHeader(&header) == SUCCESS) {
         Print(L"Kernel header successfullly verified!\n\r");
     } else {
         Print(L"Kernel format is bad!\n\r");
+        return header.e_entry;
     }
 
     // read the actual kernel progame into memory.
@@ -122,19 +136,47 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
             }
         }
     }
+    return header.e_entry;
+}
+
+EFI_STATUS
+EFIAPI
+efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
+    InitializeLib(imageHandle, systemTable);
+
+    const CHAR16 *filename = L"kernel.elf";
+    EFI_FILE *kernel = loadFile(NULL, filename, imageHandle, systemTable);
+    if (kernel != NULL) {
+        Print(L"Kernel file: %s open successfullly!\n\r", filename);
+    } else {
+        Print(L"Could not open kernel file: %s!\n\r", filename);
+        return EFI_SUCCESS;
+    }
+
+    Elf64_Addr kernelEntry = loadKernel(kernel, systemTable);
     Print(L"Kernel loaded.\n\r");
 
     // calling kenrel entry
-    int (*kernelStart)() =
-        ((__attribute__((sysv_abi)) int (*)(FrameBuffer *))header.e_entry);
+    int (*kernelStart)() = ((__attribute__((sysv_abi)) int (*)(
+        FrameBuffer *, PSF1Font *))kernelEntry);
 
-    FrameBuffer *buffer = initGOP();
+    FrameBuffer *frame = initGOP();
     Print(
         L"GOP: base: 0x%x size:0x%x width:%d height:%d "
         L"pixelsPerScanline:%d\n\r",
-        buffer->baseAddr, buffer->bufferSize, buffer->width, buffer->height,
-        buffer->pixelsPerScanline);
+        frame->baseAddr, frame->bufferSize, frame->width, frame->height,
+        frame->pixelsPerScanline);
 
-    Print(L"%d\n\r", kernelStart(buffer));
+    PSF1Font *newFont =
+        loadPSF1Font(NULL, L"zap-light16.psf", imageHandle, systemTable);
+    if (newFont != NULL) {
+        Print(L"Font loaded, char size = %d.\n\r",
+              newFont->header->characterSize);
+    } else {
+        Print(L"Font not valid\n\r");
+    }
+
+    Print(L"%d\n\r", kernelStart(frame, newFont));
+
     return EFI_SUCCESS;
 }
