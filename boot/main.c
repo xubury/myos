@@ -1,34 +1,31 @@
-#include <efi.h>
-#include <efilib.h>
-#include <elf.h>
+#include "File.h"
+#include "FrameBuffer.h"
 
-EFI_FILE *loadFile(EFI_FILE *directory, const CHAR16 *path,
-                   EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
-    EFI_FILE *loadedFile;
-    EFI_LOADED_IMAGE_PROTOCOL *loadedImage;
-    uefi_call_wrapper((void *)systemTable->BootServices->HandleProtocol, 3,
-                      imageHandle, &gEfiLoadedImageProtocolGuid,
-                      (void **)&loadedImage);
+FrameBuffer frameBuffer;
 
-    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *fileSystem;
-    uefi_call_wrapper((void *)systemTable->BootServices->HandleProtocol, 3,
-                      loadedImage->DeviceHandle,
-                      &gEfiSimpleFileSystemProtocolGuid, (void **)&fileSystem);
-    if (directory == NULL) {
-        uefi_call_wrapper((void *)fileSystem->OpenVolume, 2, fileSystem,
-                          &directory);
-    }
+FrameBuffer *initGOP() {
+    EFI_GUID gopGUID = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+    EFI_GRAPHICS_OUTPUT_PROTOCOL *gop;
+    EFI_STATUS status;
 
-    EFI_STATUS s =
-        uefi_call_wrapper((void *)directory->Open, 5, directory, &loadedFile,
-                          path, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY);
-    if (s != EFI_SUCCESS) {
+    status = uefi_call_wrapper((void *)BS->LocateProtocol, 3, &gopGUID, NULL,
+                               (void **)&gop);
+
+    if (EFI_ERROR(status)) {
+        Print(L"Unable to locate GOP.\n\r");
         return NULL;
+    } else {
+        Print(L"GOP located.\n\r");
     }
-    return loadedFile;
-}
 
-typedef uint64_t size_t;
+    frameBuffer.baseAddr = (void *)gop->Mode->FrameBufferBase;
+    frameBuffer.bufferSize = gop->Mode->FrameBufferSize;
+    frameBuffer.width = gop->Mode->Info->HorizontalResolution;
+    frameBuffer.height = gop->Mode->Info->VerticalResolution;
+    frameBuffer.pixelsPerScanline = gop->Mode->Info->PixelsPerScanLine;
+
+    return &frameBuffer;
+}
 
 int memcmp(const void *aptr, const void *hptr, size_t n) {
     const unsigned char *a = aptr, *b = hptr;
@@ -129,7 +126,15 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
 
     // calling kenrel entry
     int (*kernelStart)() =
-        ((__attribute__((sysv_abi)) int (*)())header.e_entry);
-    Print(L"%d\n\r", kernelStart());
+        ((__attribute__((sysv_abi)) int (*)(FrameBuffer *))header.e_entry);
+
+    FrameBuffer *buffer = initGOP();
+    Print(
+        L"GOP: base: 0x%x size:0x%x width:%d height:%d "
+        L"pixelsPerScanline:%d\n\r",
+        buffer->baseAddr, buffer->bufferSize, buffer->width, buffer->height,
+        buffer->pixelsPerScanline);
+
+    Print(L"%d\n\r", kernelStart(buffer));
     return EFI_SUCCESS;
 }

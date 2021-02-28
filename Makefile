@@ -7,6 +7,7 @@ export LD=x86_64-elf-ld
 
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic
+CXX_INCLUDES=-Iboot
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(wildcard src/kernel/*.cpp)
@@ -14,7 +15,7 @@ kernel_object_files := $(patsubst src/kernel/%.cpp, $(BUILD_DIR)/kernel/%.o, $(k
 
 $(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
 	mkdir -p $(dir $@) && \
-	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) \
+	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) $(CXX_INCLUDES) \
 	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
 
 .PHONY: all
