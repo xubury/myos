@@ -23,16 +23,16 @@ LD_FLAGS=-nostdlib -znocombreloc -T $(GNU_EFI_LINKER) -shared -Bsymbolic \
 boot_efi=$(BUILD_DIR)/main.efi
 boot_so=$(BUILD_DIR)/main.so
 
-kernel_source_files := $(wildcard src/kernel/*.cpp)
-kernel_object_files := $(patsubst src/kernel/%.cpp, $(BUILD_DIR)/kernel/%.o, $(kernel_source_files))
+boot_source_files := $(wildcard boot/*.c)
+boot_object_files := $(patsubst boot/%.c, $(BUILD_DIR)/boot/%.o, $(boot_source_files))
 
-$(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
+$(boot_object_files): $(BUILD_DIR)/boot/%.o : boot/%.c
 	mkdir -p $(dir $@) && \
 	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) \
-	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
+	$(patsubst $(BUILD_DIR)/boot/%.o, boot/%.c, $@) -o $@
 
-$(BUILD_DIR)/%.so: $(kernel_object_files)
-	$(LD) $(LD_FLAGS) $(kernel_object_files) -o $@ $(GNU_EFI_LIBS)
+$(boot_so): $(boot_object_files)
+	$(LD) $(LD_FLAGS) $(boot_object_files) -o $@ $(GNU_EFI_LIBS)
 
 $(boot_efi): $(boot_so)
 	objcopy -j .text -j .sdata -j .data -j .dynamic -j .dynsym -j .rel -j .rela \
