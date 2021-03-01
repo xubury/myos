@@ -1,6 +1,5 @@
+#include "BootInfo.h"
 #include "File.h"
-#include "FrameBuffer.h"
-#include "PSF1Font.h"
 
 #define SUCCESS 0
 #define FAILURE 1
@@ -147,10 +146,6 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
     Elf64_Addr kernelEntry = loadKernel(kernel, systemTable);
     Print(L"Kernel loaded.\n\r");
 
-    // calling kenrel entry
-    int (*kernelStart)() = ((__attribute__((sysv_abi)) int (*)(
-        FrameBuffer *, PSF1Font *))kernelEntry);
-
     FrameBuffer *frame = initGOP();
     Print(
         L"GOP: base: 0x%x size:0x%x width:%d height:%d "
@@ -167,7 +162,34 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
         Print(L"Font not valid\n\r");
     }
 
-    Print(L"0x%x\n\r", kernelStart(frame, newFont));
+    EFI_MEMORY_DESCRIPTOR *map = NULL;
+    uint64_t mapSize;
+    uint64_t mapKey;
+    uint64_t descriptorSize;
+    uint32_t descriptorVersion;
+    uefi_call_wrapper((void *)systemTable->BootServices->GetMemoryMap, 5,
+                      &mapSize, map, &mapKey, &descriptorSize,
+                      &descriptorVersion);
+    map = AllocatePool(mapSize);
+    uefi_call_wrapper((void *)systemTable->BootServices->GetMemoryMap, 5,
+                      &mapSize, map, &mapKey, &descriptorSize,
+                      &descriptorVersion);
+
+    // calling kenrel entry
+    void (*kernelStart)() =
+        ((__attribute__((sysv_abi)) void (*)(BootInfo *))kernelEntry);
+
+    BootInfo bootInfo;
+    bootInfo.frameBuffer = frame;
+    bootInfo.psf1Font = newFont;
+    bootInfo.map = map;
+    bootInfo.mapSize = mapSize;
+    bootInfo.mapDescriptorSize = descriptorSize;
+
+    uefi_call_wrapper((void *)systemTable->BootServices->ExitBootServices, 2,
+                      imageHandle, mapKey);
+
+    kernelStart(&bootInfo);
 
     return EFI_SUCCESS;
 }

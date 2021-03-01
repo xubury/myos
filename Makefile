@@ -8,9 +8,14 @@ export font_file=$(ROOT_DIR)/zap-light16.psf
 export CC=gcc
 export LD=ld
 
+export GNU_EFI_INCLUDE=/usr/include/efi
+export GNU_EFI_INCLUDES=-I$(GNU_EFI_INCLUDE) -I$(GNU_EFI_INCLUDE)/x86_64 -I$(GNU_EFI_INCLUDE)/protocol
+export GNU_EFI_CRT_OBJ=$(LIB)/crt0-efi-x86_64.o
+export GNU_EFI_LINKER=$(LIB)/elf_x86_64_efi.lds
+export GNU_EFI_LIBS=-lgnuefi -lefi
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
-CXX_INCLUDES=-Isrc/common -Isrc/string
+CXX_INCLUDES=$(GNU_EFI_INCLUDES) -Iboot -Isrc/common -Isrc/string
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(shell find src -name *.cpp)
