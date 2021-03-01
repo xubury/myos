@@ -13,8 +13,7 @@ struct GDTEntry {
     uint16_t base0;
     uint8_t base1;
     uint8_t accessByte;
-    uint8_t limit1 : 4;
-    uint8_t flag : 4;
+    uint8_t limit1Flag;
     uint8_t base2;
 } __attribute__((packed));
 
