@@ -10,7 +10,7 @@ export LD=x86_64-elf-ld
 
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic
-CXX_INCLUDES=-Iboot
+CXX_INCLUDES=-Isrc/common
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(wildcard src/kernel/*.cpp)

@@ -11,6 +11,7 @@ GNU_EFI_LIBS=-lgnuefi -lefi
 CXX_FLAGS=-c -ffreestanding -Wall \
 		  -fpic -fno-stack-protector -fshort-wchar -mno-red-zone \
 		  -DEFI_FUNCTION_WRAPPER
+CXX_INCLUDES=-I/usr/include -I$(ROOT_DIR)/src/common
 LD_FLAGS=-nostdlib -znocombreloc -T $(GNU_EFI_LINKER) -shared -Bsymbolic \
 		 -L $(LIB) $(GNU_EFI_CRT_OBJ)
 
@@ -22,7 +23,7 @@ boot_object_files := $(patsubst %.c, $(BUILD_DIR)/boot/%.o, $(boot_source_files)
 
 $(boot_object_files): $(BUILD_DIR)/boot/%.o : %.c
 	mkdir -p $(dir $@) && \
-	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) -I/usr/include \
+	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) $(CXX_INCLUDES) \
 	$(patsubst $(BUILD_DIR)/boot/%.o, %.c, $@) -o $@
 
 $(boot_so): $(boot_object_files)
