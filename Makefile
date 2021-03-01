@@ -5,8 +5,8 @@ export BUILD_DIR=$(ROOT_DIR)/build
 
 export kernel_elf=$(BUILD_DIR)/kernel.elf
 export font_file=$(ROOT_DIR)/zap-light16.psf
-export CC=x86_64-elf-gcc
-export LD=x86_64-elf-ld
+export CC=gcc
+export LD=ld
 
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17

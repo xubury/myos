@@ -10,10 +10,8 @@ PSF1Font *loadPSF1Font(EFI_FILE *directory, const CHAR16 *path,
     EFI_FILE *font = loadFile(directory, path, imageHandle, systemTable);
     if (font == NULL) return NULL;
 
-    PSF1Header *fontHeader = NULL;
     uint64_t headerSize = sizeof(PSF1Header);
-    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
-                      headerSize, (void **)&fontHeader);
+    PSF1Header *fontHeader = AllocatePool(headerSize);
     uefi_call_wrapper(font->Read, 3, font, &headerSize, fontHeader);
 
     if (fontHeader->magic[0] != PSF1_MAGIC0 ||
@@ -29,15 +27,11 @@ PSF1Font *loadPSF1Font(EFI_FILE *directory, const CHAR16 *path,
         glyphBufferSize = fontHeader->characterSize * 256;
     }
 
-    void *glyphBuffer;
+    void *glyphBuffer = AllocatePool(glyphBufferSize);
     uefi_call_wrapper(font->SetPosition, 2, font, headerSize);
-    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
-                      glyphBufferSize, (void **)&glyphBuffer);
     uefi_call_wrapper(font->Read, 3, font, &glyphBufferSize, glyphBuffer);
 
-    PSF1Font *finishedFont;
-    uefi_call_wrapper(systemTable->BootServices->AllocatePool, 3, EfiLoaderData,
-                      sizeof(PSF1Font), (void **)&finishedFont);
+    PSF1Font *finishedFont = AllocatePool(sizeof(PSF1Font));
     finishedFont->header = fontHeader;
     finishedFont->glyphBuffer = glyphBuffer;
     return finishedFont;
@@ -60,7 +54,8 @@ FrameBuffer *initGOP() {
         Print(L"GOP located.\n\r");
     }
 
-    frameBuffer.baseAddr = (void *)gop->Mode->FrameBufferBase;
+    uefi_call_wrapper(gop->SetMode, 2, gop, 2);
+    frameBuffer.baseAddr = gop->Mode->FrameBufferBase;
     frameBuffer.bufferSize = gop->Mode->FrameBufferSize;
     frameBuffer.width = gop->Mode->Info->HorizontalResolution;
     frameBuffer.height = gop->Mode->Info->VerticalResolution;
@@ -97,9 +92,6 @@ Elf64_Addr loadKernel(EFI_FILE *kernel, EFI_SYSTEM_TABLE *systemTable) {
     uint64_t fileInfoSize = 0;
     uefi_call_wrapper((void *)kernel->GetInfo, 4, kernel, &gEfiFileInfoGuid,
                       &fileInfoSize, NULL);
-    uint8_t *fileInfo;
-    uefi_call_wrapper((void *)systemTable->BootServices->AllocatePool, 3,
-                      EfiLoaderData, fileInfoSize, (void **)&fileInfo);
 
     uint64_t headerSize = sizeof(Elf64_Ehdr);
     uefi_call_wrapper((void *)kernel->Read, 3, kernel, &headerSize, &header);
@@ -111,10 +103,9 @@ Elf64_Addr loadKernel(EFI_FILE *kernel, EFI_SYSTEM_TABLE *systemTable) {
     }
 
     // read the actual kernel progame into memory.
-    Elf64_Phdr *phdrs;
     uefi_call_wrapper((void *)kernel->SetPosition, 2, kernel, header.e_phoff);
     uint64_t programSize = header.e_phnum * header.e_phentsize;
-    phdrs = AllocatePool(programSize);
+    Elf64_Phdr *phdrs = AllocatePool(programSize);
     uefi_call_wrapper((void *)kernel->Read, 3, kernel, &programSize, phdrs);
 
     for (Elf64_Phdr *phdr = phdrs; (char *)phdr < (char *)phdrs + programSize;

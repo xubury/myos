@@ -2,25 +2,32 @@
 
 uint8_t BasicRenderer::bytesPerPixel = 4;
 
-BasicRenderer::BasicRenderer(FrameBuffer *frameBuffer, PSF1Font *fontBuffer,
-                             uint32_t x, uint32_t y, RGBA color)
-    : m_frame(frameBuffer), m_font(fontBuffer), m_cursor(x, y, color) {}
+BasicRenderer::BasicRenderer(FrameBuffer *frameBuffer, PSF1Font *fontBuffer)
+    : m_frame(frameBuffer), m_font(fontBuffer) {}
+
+void BasicRenderer::setPixel(uint32_t x, uint32_t y, RGBA color) {
+    *((uint32_t *)(m_frame->baseAddr +
+                   bytesPerPixel * m_frame->pixelsPerScanline * y +
+                   bytesPerPixel * x)) = (uint32_t)color;
+}
+
+RGBA BasicRenderer::getPixel(uint32_t x, uint32_t y) {
+    return RGBA(*((uint32_t *)(m_frame->baseAddr +
+                               bytesPerPixel * m_frame->pixelsPerScanline * y +
+                               bytesPerPixel * x)));
+}
 
 void BasicRenderer::putChar(char character, uint32_t xOff, uint32_t yOff,
                             RGBA foreground, RGBA background) {
     uint8_t charSize = m_font->header->characterSize;
-    uint32_t *pixPtr = (uint32_t *)m_frame->baseAddr;
     char *fontPtr = (char *)m_font->glyphBuffer + (character * charSize);
     for (uint32_t y = yOff; y < yOff + charSize; ++y) {
         for (uint32_t x = xOff; x < xOff + 8; ++x) {
-            uint32_t color;
             if ((*fontPtr & (0b10000000) >> (x - xOff)) > 0) {
-                color = (uint32_t)foreground;
+                setPixel(x, y, foreground);
             } else {
-                color = (uint32_t)background;
+                setPixel(x, y, background);
             }
-            *(uint32_t *)(pixPtr + x + (y * m_frame->pixelsPerScanline)) =
-                color;
         }
         ++fontPtr;
     }
@@ -46,11 +53,19 @@ void BasicRenderer::printNewLine() {
     m_cursor.y += m_font->header->characterSize;
 }
 
+void BasicRenderer::scrollDown() {
+    uint8_t charSize = m_font->header->characterSize;
+    for (uint32_t y = 0; y < m_frame->height - charSize; ++y) {
+        for (uint32_t x = 0; x < m_frame->pixelsPerScanline; ++x) {
+            setPixel(x, y, getPixel(x, y + charSize));
+        }
+    }
+    m_cursor.x = 0;
+}
+
 void BasicRenderer::clearScanline(uint32_t y) {
-    uint64_t bytePerScanline = m_frame->pixelsPerScanline * bytesPerPixel;
-    char *pixPtrBase = (char *)m_frame->baseAddr + (bytePerScanline * y);
-    for (uint32_t x = 0; x < bytePerScanline; x += bytesPerPixel) {
-        *(uint32_t *)(pixPtrBase + x) = 0;
+    for (uint32_t x = 0; x < m_frame->pixelsPerScanline; ++x) {
+        setPixel(x, y, RGBA(0, 0, 0));
     }
 }
 
