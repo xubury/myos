@@ -44,4 +44,5 @@ run:
 
 .PHONY: bear
 bear:
+	mkdir -p $(BUILD_DIR) && \
 	bear --output build/compile_commands.json -- make all
