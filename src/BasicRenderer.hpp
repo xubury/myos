@@ -45,6 +45,7 @@ class BasicRenderer {
                  RGBA background);
 
     void print(const char* str);
+    void printNewLine();
 
     void clearScreen();
 

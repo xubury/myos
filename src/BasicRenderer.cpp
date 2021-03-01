@@ -27,17 +27,23 @@ void BasicRenderer::putChar(char character, uint32_t xOff, uint32_t yOff,
 }
 
 void BasicRenderer::print(const char *str) {
-    const char *ch = str;
-    while (*ch != '\0') {
+    for (const char *ch = str; *ch != '\0'; ++ch) {
+        if (*ch == '\n') {
+            printNewLine();
+            continue;
+        }
         putChar(*ch, m_cursor.x, m_cursor.y, m_cursor.foregoundColor,
                 m_cursor.backgoundColor);
         m_cursor.x += 8;
         if (m_cursor.x + 8 > m_frame->width) {
-            m_cursor.x = 0;
-            m_cursor.y += m_font->header->characterSize;
+            printNewLine();
         }
-        ++ch;
     }
+}
+
+void BasicRenderer::printNewLine() {
+    m_cursor.x = 0;
+    m_cursor.y += m_font->header->characterSize;
 }
 
 void BasicRenderer::clearScanline(uint32_t y) {
