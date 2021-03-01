@@ -9,18 +9,18 @@ export CC=x86_64-elf-gcc
 export LD=x86_64-elf-ld
 
 
-CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic
-CXX_INCLUDES=-Isrc/common
+CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
+CXX_INCLUDES=-Isrc/common -Isrc/string
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
-kernel_source_files := $(wildcard src/kernel/*.cpp)
-kernel_header_files := $(wildcard src/kernel/*.hpp)
-kernel_object_files := $(patsubst src/kernel/%.cpp, $(BUILD_DIR)/kernel/%.o, $(kernel_source_files))
+kernel_source_files := $(shell find src -name *.cpp)
+kernel_header_files := $(shell find src -name *.hpp)
+kernel_object_files := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(kernel_source_files))
 
-$(kernel_object_files):  $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp $(kernel_header_files)
+$(kernel_object_files):  $(BUILD_DIR)/%.o : %.cpp $(kernel_header_files)
 	mkdir -p $(dir $@) && \
 	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) $(CXX_INCLUDES) \
-	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
+	$(patsubst $(BUILD_DIR)/%.o, %.cpp, $@) -o $@
 
 link:$(kernel_object_files)
 	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files)
