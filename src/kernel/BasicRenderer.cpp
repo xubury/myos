@@ -1,13 +1,13 @@
-#include "VGABuffer.hpp"
+#include "BasicRenderer.hpp"
 
-uint8_t VGABuffer::bytesPerPixel = 4;
+uint8_t BasicRenderer::bytesPerPixel = 4;
 
-VGABuffer::VGABuffer(FrameBuffer *frameBuffer, PSF1Font *fontBuffer, uint32_t x,
-                     uint32_t y, uint32_t color)
+BasicRenderer::BasicRenderer(FrameBuffer *frameBuffer, PSF1Font *fontBuffer,
+                             uint32_t x, uint32_t y, uint32_t color)
     : m_frame(frameBuffer), m_font(fontBuffer), m_cursor(x, y, color) {}
 
-void VGABuffer::putChar(uint32_t color, char character, uint32_t xOff,
-                        uint32_t yOff) {
+void BasicRenderer::putChar(uint32_t color, char character, uint32_t xOff,
+                            uint32_t yOff) {
     uint8_t charSize = m_font->header->characterSize;
     uint32_t *pixPtr = (uint32_t *)m_frame->baseAddr;
     char *fontPtr = (char *)m_font->glyphBuffer + (character * charSize);
@@ -22,7 +22,7 @@ void VGABuffer::putChar(uint32_t color, char character, uint32_t xOff,
     }
 }
 
-void VGABuffer::print(const char *str) {
+void BasicRenderer::print(const char *str) {
     const char *ch = str;
     while (*ch != '\0') {
         putChar(m_cursor.color, *ch, m_cursor.x, m_cursor.y);
@@ -35,7 +35,7 @@ void VGABuffer::print(const char *str) {
     }
 }
 
-void VGABuffer::clearScanline(uint32_t y) {
+void BasicRenderer::clearScanline(uint32_t y) {
     uint64_t bytePerScanline = m_frame->pixelsPerScanline * bytesPerPixel;
     char *pixPtrBase = (char *)m_frame->baseAddr + (bytePerScanline * y);
     for (uint32_t x = 0; x < bytePerScanline; x += bytesPerPixel) {
@@ -43,7 +43,7 @@ void VGABuffer::clearScanline(uint32_t y) {
     }
 }
 
-void VGABuffer::clearScreen() {
+void BasicRenderer::clearScreen() {
     for (uint32_t y = 0; y < m_frame->height; ++y) {
         clearScanline(y);
     }

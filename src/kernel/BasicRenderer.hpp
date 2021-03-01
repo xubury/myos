@@ -1,5 +1,5 @@
-#ifndef VGA_BUFFER_HPP
-#define VGA_BUFFER_HPP
+#ifndef BASIC_RENDERER_HPP
+#define BASIC_RENDERER_HPP
 
 #include "FrameBuffer.h"
 #include "PSF1Font.h"
@@ -12,12 +12,12 @@ struct Cursor {
         : x(x), y(y), color(color) {}
 };
 
-class VGABuffer {
+class BasicRenderer {
    public:
     static uint8_t bytesPerPixel;
 
-    VGABuffer(FrameBuffer* frameBuffer, PSF1Font* fontBuffer, uint32_t x = 0,
-              uint32_t y = 0, uint32_t color = 0xffffffff);
+    BasicRenderer(FrameBuffer* frameBuffer, PSF1Font* fontBuffer,
+                  uint32_t x = 0, uint32_t y = 0, uint32_t color = 0xffffffff);
 
     void putChar(uint32_t color, char character, uint32_t xOff, uint32_t yOff);
 
