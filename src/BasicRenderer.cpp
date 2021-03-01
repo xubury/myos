@@ -36,21 +36,25 @@ void BasicRenderer::putChar(char character, uint32_t xOff, uint32_t yOff,
 void BasicRenderer::print(const char *str) {
     for (const char *ch = str; *ch != '\0'; ++ch) {
         if (*ch == '\n') {
-            printNewLine();
+            newLine();
             continue;
         }
         putChar(*ch, m_cursor.x, m_cursor.y, m_cursor.foregoundColor,
                 m_cursor.backgoundColor);
         m_cursor.x += 8;
         if (m_cursor.x + 8 > m_frame->width) {
-            printNewLine();
+            newLine();
         }
     }
 }
 
-void BasicRenderer::printNewLine() {
+void BasicRenderer::newLine() {
     m_cursor.x = 0;
-    m_cursor.y += m_font->header->characterSize;
+    if (m_cursor.y + m_font->header->characterSize * 2 >= m_frame->height) {
+        scrollDown();
+    } else {
+        m_cursor.y += m_font->header->characterSize;
+    }
 }
 
 void BasicRenderer::scrollDown() {
@@ -60,7 +64,9 @@ void BasicRenderer::scrollDown() {
             setPixel(x, y, getPixel(x, y + charSize));
         }
     }
-    m_cursor.x = 0;
+    for (uint32_t y = m_frame->height - charSize; y < m_frame->height; ++y) {
+        clearScanline(y, m_cursor.backgoundColor);
+    }
 }
 
 void BasicRenderer::clearScanline(uint32_t y, RGBA color) {
