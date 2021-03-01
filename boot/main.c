@@ -176,7 +176,7 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
         Print(L"Font not valid\n\r");
     }
 
-    Print(L"%d\n\r", kernelStart(frame, newFont));
+    Print(L"0x%x\n\r", kernelStart(frame, newFont));
 
     return EFI_SUCCESS;
 }

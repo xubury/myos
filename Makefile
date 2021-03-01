@@ -14,9 +14,10 @@ CXX_INCLUDES=-Isrc/common
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(wildcard src/kernel/*.cpp)
+kernel_header_files := $(wildcard src/kernel/*.hpp)
 kernel_object_files := $(patsubst src/kernel/%.cpp, $(BUILD_DIR)/kernel/%.o, $(kernel_source_files))
 
-$(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
+$(kernel_object_files):  $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp $(kernel_header_files)
 	mkdir -p $(dir $@) && \
 	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) $(CXX_INCLUDES) \
 	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
@@ -35,8 +36,12 @@ clean:
 
 .PHONY: run
 run:
+	make all && \
 	qemu-system-x86_64 -drive file=$(BUILD_DIR)/$(OSNAME).img -m 256M -cpu qemu64 \
 	-drive if=pflash,format=raw,unit=0,file="build/ovmf/OVMF_CODE.fd",readonly=on \
 	-drive if=pflash,format=raw,unit=1,file="build/ovmf/OVMF_VARS.fd" \
 	-net none
 
+.PHONY: bear
+bear:
+	bear --output build/compile_commands.json -- make all
