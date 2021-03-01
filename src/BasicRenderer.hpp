@@ -56,11 +56,11 @@ class BasicRenderer {
     void printNewLine();
     void scrollDown();
 
-    void clearScreen();
+    void clearScreen(RGBA color = RGBA());
 
     void setColor(RGBA foreground, RGBA background);
 
-    void clearScanline(uint32_t y);
+    void clearScanline(uint32_t y, RGBA color);
 
    private:
     FrameBuffer* m_frame;

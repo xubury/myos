@@ -63,15 +63,15 @@ void BasicRenderer::scrollDown() {
     m_cursor.x = 0;
 }
 
-void BasicRenderer::clearScanline(uint32_t y) {
+void BasicRenderer::clearScanline(uint32_t y, RGBA color) {
     for (uint32_t x = 0; x < m_frame->pixelsPerScanline; ++x) {
-        setPixel(x, y, RGBA(0, 0, 0));
+        setPixel(x, y, color);
     }
 }
 
-void BasicRenderer::clearScreen() {
+void BasicRenderer::clearScreen(RGBA color) {
     for (uint32_t y = 0; y < m_frame->height; ++y) {
-        clearScanline(y);
+        clearScanline(y, color);
     }
 }
 
