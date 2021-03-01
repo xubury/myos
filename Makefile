@@ -21,9 +21,11 @@ $(kernel_object_files): $(BUILD_DIR)/kernel/%.o : src/kernel/%.cpp
 	$(CC) $(CXX_FLAGS) $(GNU_EFI_INCLUDES) $(CXX_INCLUDES) \
 	$(patsubst $(BUILD_DIR)/kernel/%.o, src/kernel/%.cpp, $@) -o $@
 
+link:$(kernel_object_files)
+	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files)
+
 .PHONY: all
-all: $(kernel_object_files)
-	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files) && \
+all:link
 	$(MAKE) -C boot img
 
 .PHONY: clean
