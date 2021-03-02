@@ -15,24 +15,23 @@ CXX_INCLUDES=-Isrc/common -Isrc/string -Isrc/memory
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(shell find src -name *.cpp)
-kernel_header_files := $(shell find src -name *.hpp)
+kernel_header_files := $(shell find src -name *.hpp -or -name *.h)
 kernel_object_files := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(kernel_source_files))
 
-$(kernel_object_files):  $(BUILD_DIR)/%.o : %.cpp $(kernel_header_files)
+$(BUILD_DIR)/%.o : %.cpp $(kernel_header_files)
 	mkdir -p $(dir $@) && \
-	$(CC) $(CXX_FLAGS) $(CXX_INCLUDES) \
-	$(patsubst $(BUILD_DIR)/%.o, %.cpp, $@) -o $@
+	$(CC) $(CXX_FLAGS) $(CXX_INCLUDES) $(patsubst $(BUILD_DIR)/%.o, %.cpp, $@) -o $@
 
-link:$(kernel_object_files)
+link: $(kernel_object_files)
 	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files)
 
 .PHONY: all
-all:link
-	$(MAKE) -C boot img
+all: link
+	make -C boot img
 
 .PHONY: clean
 clean:
-	rm $(kernel_elf) $(kernel_object_files)
+	rm -f $(kernel_object_files) $(kernel_elf) && \
 	make -C boot clean
 
 .PHONY: run
