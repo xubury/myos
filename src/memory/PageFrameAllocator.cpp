@@ -29,7 +29,7 @@ void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
         }
     }
 
-    size_t memorySize = getMemorySize(map, mapEntries, descriptorSize);
+    size_t memorySize = getMemorySize(map, mapSize, descriptorSize);
     freeMemory = memorySize;
 
     size_t bitmapSize = memorySize / 4096 / 8 + 1;

@@ -10,7 +10,6 @@ extern uint64_t _kernelStart;
 extern uint64_t _kernelEnd;
 
 extern "C" void _start(BootInfo *info) {
-    size_t mapEntries = info->mapSize / info->mapDescriptorSize;
     g_PageFrameAllocator.readEFIMemoryMap(info->map, info->mapSize,
                                           info->mapDescriptorSize);
     uint64_t kernelSize = (uint64_t)&_kernelEnd - (uint64_t)&_kernelStart;
@@ -22,7 +21,7 @@ extern "C" void _start(BootInfo *info) {
     memset(p4Table, 0, 0x1000);
     PageTableManager pageManager = PageTableManager(p4Table);
     size_t memorySize =
-        getMemorySize(info->map, mapEntries, info->mapDescriptorSize);
+        getMemorySize(info->map, info->mapSize, info->mapDescriptorSize);
     for (uint64_t i = 0; i < memorySize; i += 0x1000) {
         pageManager.mapMemory((void *)i, (void *)i);
     }
@@ -35,7 +34,7 @@ extern "C" void _start(BootInfo *info) {
     asm("mov %0, %%cr3" : : "r"(p4Table));
 
     BasicRenderer renderer(info->frameBuffer, info->psf1Font);
-    // renderer.clearScreen();
+    renderer.clearScreen();
     renderer.print("This is the first line!\n");
     renderer.setColor(RGBA(0, 255, 255), RGBA());
     renderer.print("Welcome to my kernel!\n");
