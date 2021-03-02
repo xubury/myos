@@ -3,6 +3,8 @@ export OSNAME=myos
 export ROOT_DIR=$(shell pwd)
 export BUILD_DIR=$(ROOT_DIR)/build
 
+export LIB_DIR=/usr/lib
+
 export kernel_elf=$(BUILD_DIR)/kernel.elf
 export font_file=$(ROOT_DIR)/zap-light16.psf
 export CC=gcc

@@ -1,11 +1,9 @@
 OVMF_DIR=/usr/share/OVMF/x64
 
-LIB=/usr/lib64
-
 GNU_EFI_INCLUDE=/usr/include/efi
 GNU_EFI_INCLUDES=-I$(GNU_EFI_INCLUDE) -I$(GNU_EFI_INCLUDE)/x86_64 -I$(GNU_EFI_INCLUDE)/protocol
-GNU_EFI_CRT_OBJ=$(LIB)/crt0-efi-x86_64.o
-GNU_EFI_LINKER=$(LIB)/elf_x86_64_efi.lds
+GNU_EFI_CRT_OBJ=$(LIB_DIR)/crt0-efi-x86_64.o
+GNU_EFI_LINKER=$(LIB_DIR)/elf_x86_64_efi.lds
 GNU_EFI_LIBS=-lgnuefi -lefi
 
 CXX_FLAGS=-c -ffreestanding -Wall \
@@ -13,7 +11,7 @@ CXX_FLAGS=-c -ffreestanding -Wall \
 		  -DEFI_FUNCTION_WRAPPER
 CXX_INCLUDES=-I/usr/include -I$(ROOT_DIR)/src/common
 LD_FLAGS=-nostdlib -znocombreloc -T $(GNU_EFI_LINKER) -shared -Bsymbolic \
-		 -L $(LIB) $(GNU_EFI_CRT_OBJ)
+		 -L $(LIB_DIR) $(GNU_EFI_CRT_OBJ)
 
 boot_efi=$(BUILD_DIR)/main.efi
 boot_so=$(BUILD_DIR)/main.so
