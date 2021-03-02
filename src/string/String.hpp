@@ -40,18 +40,21 @@ char* toString(float value, uint8_t decimalPlaces = 2);
 
 template <typename T>
 inline char* toHexString(T value) {
-    char* valPtr = (char*)&value;
-    char* ptr;
+    uint8_t* valPtr = (uint8_t*)&value;
+    uint8_t* ptr;
     uint8_t tmp;
-    uint8_t size = sizeof(decltype(value)) * 2 - 1;
-    for (uint8_t i = 0; i < size; ++i) {
+    uint8_t bytes = sizeof(decltype(value));
+    buffer[0] = '0';
+    buffer[1] = 'x';
+    uint8_t size = bytes * 2 + 2;
+    for (uint8_t i = 0; i < bytes; ++i) {
         ptr = (valPtr + i);
         tmp = ((*ptr & 0xF0) >> 4);
-        buffer[size - (i * 2 + 1)] = tmp + (tmp > 9 ? 55 : '0');
+        buffer[size - 1 - (i * 2 + 1)] = tmp + (tmp > 9 ? 55 : '0');
         tmp = (*ptr & 0x0F);
-        buffer[size - i * 2] = tmp + (tmp > 9 ? 55 : '0');
+        buffer[size - 1 - i * 2] = tmp + (tmp > 9 ? 55 : '0');
     }
-    buffer[size + 1] = 0;
+    buffer[size] = 0;
     return buffer;
 }
 
