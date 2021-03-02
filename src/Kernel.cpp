@@ -47,9 +47,9 @@ void testString(BasicRenderer &renderer) {
 
 void testBitmap(BasicRenderer &renderer) {
     renderer.print("\nTesting bitmap:\n");
-    renderer.print("Expecting: 0x48 0x00 .... 0x00\n");
+    renderer.print("Expecting: 0x48 0x00\n");
     renderer.print("Getting: ");
-    uint8_t buffer[20] = {0};
+    uint8_t buffer[2] = {0};
     Bitmap bitmap;
     bitmap.buffer = buffer;
     bitmap.set(0, false);
@@ -57,7 +57,7 @@ void testBitmap(BasicRenderer &renderer) {
     bitmap.set(2, false);
     bitmap.set(3, false);
     bitmap.set(4, true);
-    for (int i = 0; i < 20; ++i) {
+    for (size_t i = 0; i < sizeof(buffer); ++i) {
         renderer.print(toHexString(buffer[i]));
         renderer.print(" ");
     }
