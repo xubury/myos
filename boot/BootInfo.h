@@ -1,10 +1,9 @@
 #ifndef BOOT_INFO_H
 #define BOOT_INFO_H
 
-#include <efi.h>
-
 #include "FrameBuffer.h"
 #include "PSF1Font.h"
+#include "efi.h"
 
 typedef struct {
     FrameBuffer* frameBuffer;

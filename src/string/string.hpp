@@ -62,6 +62,10 @@ inline char* toString(double value, uint8_t decimalPlaces = 2) {
     return buffer;
 }
 
+inline char* toString(float value, uint8_t decimalPlaces = 2) {
+    return toString((double)value, decimalPlaces);
+}
+
 template <typename T>
 inline char* toHexString(T value) {
     char* valPtr = (char*)&value;
