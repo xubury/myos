@@ -4,6 +4,9 @@
 #include "PageFrameAllocator.hpp"
 #include "String.hpp"
 
+extern uint64_t _kernelStart;
+extern uint64_t _kernelEnd;
+
 extern "C" void _start(BootInfo *info) {
     BasicRenderer renderer(info->frameBuffer, info->psf1Font);
     renderer.clearScreen();
@@ -23,7 +26,12 @@ extern "C" void _start(BootInfo *info) {
     renderer.print(toHexString<float>(1.2));
     renderer.newLine();
 
+    size_t kernelSize = (uint64_t)&_kernelEnd - (uint64_t)&_kernelStart;
+    size_t kernelPages = kernelSize / 4096 + 1;
     PageFrameAllocator allocator;
+    allocator.readEFIMemoryMap(info->map, info->mapSize,
+                               info->mapDescriptorSize);
+    allocator.lockPages(&_kernelStart, kernelPages);
     for (int i = 0; i < 20; ++i) {
         void *addr = allocator.requestPage();
         renderer.print(toHexString((uint64_t)addr));
@@ -31,8 +39,6 @@ extern "C" void _start(BootInfo *info) {
     }
     renderer.print("Memeory size:\n");
     renderer.setColor(RGBA(255, 0, 0), RGBA());
-    allocator.readEFIMemoryMap(info->map, info->mapSize,
-                               info->mapDescriptorSize);
     renderer.print("free: ");
     renderer.print(toString((float)allocator.getFreeRAM() / (1024 * 1024)));
     renderer.print(" MB\n");

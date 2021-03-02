@@ -3,6 +3,8 @@ ENTRY(_start)
 
 SECTIONS
 {
+    _kernelStart = .;
+
 	.text : ALIGN(0x1000)
 	{
 		*(.text)
@@ -20,4 +22,5 @@ SECTIONS
 		*(COMMON)
 		*(.bss)
 	}
+    _kernelEnd = .;
 }
