@@ -35,7 +35,7 @@ extern "C" void _start(BootInfo *info) {
     asm("mov %0, %%cr3" : : "r"(p4Table));
 
     BasicRenderer renderer(info->frameBuffer, info->psf1Font);
-    renderer.clearScreen();
+    // renderer.clearScreen();
     renderer.print("This is the first line!\n");
     renderer.setColor(RGBA(0, 255, 255), RGBA());
     renderer.print("Welcome to my kernel!\n");

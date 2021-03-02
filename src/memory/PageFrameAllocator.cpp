@@ -71,9 +71,10 @@ void PageFrameAllocator::freePage(void *addr) {
     if (m_pageBitmap[index] == false) {
         return;
     }
-    m_pageBitmap.set(index, false);
-    freeMemory += 4096;
-    usedMemory -= 4096;
+    if (m_pageBitmap.set(index, false)) {
+        freeMemory += 4096;
+        usedMemory -= 4096;
+    }
 }
 
 void PageFrameAllocator::lockPage(void *addr) {
@@ -81,9 +82,10 @@ void PageFrameAllocator::lockPage(void *addr) {
     if (m_pageBitmap[index] == true) {
         return;
     }
-    m_pageBitmap.set(index, true);
-    freeMemory -= 4096;
-    usedMemory += 4096;
+    if (m_pageBitmap.set(index, true)) {
+        freeMemory -= 4096;
+        usedMemory += 4096;
+    }
 }
 
 void PageFrameAllocator::reservePage(void *addr) {
@@ -91,9 +93,11 @@ void PageFrameAllocator::reservePage(void *addr) {
     if (m_pageBitmap[index] == false) {
         return;
     }
-    m_pageBitmap.set(index, false);
-    freeMemory -= 4096;
-    reservedMemory += 4096;
+
+    if (m_pageBitmap.set(index, false)) {
+        freeMemory -= 4096;
+        reservedMemory += 4096;
+    }
 }
 
 void PageFrameAllocator::unreservePage(void *addr) {
@@ -101,9 +105,10 @@ void PageFrameAllocator::unreservePage(void *addr) {
     if (m_pageBitmap[index] == true) {
         return;
     }
-    m_pageBitmap.set(index, true);
-    freeMemory += 4096;
-    reservedMemory -= 4096;
+    if (m_pageBitmap.set(index, true)) {
+        freeMemory += 4096;
+        reservedMemory -= 4096;
+    }
 }
 
 void PageFrameAllocator::freePages(void *addr, size_t pageCnt) {

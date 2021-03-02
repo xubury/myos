@@ -7,7 +7,7 @@
 class Bitmap {
    public:
     bool operator[](uint64_t index);
-    void set(uint64_t index, bool value);
+    bool set(uint64_t index, bool value);
 
     uint8_t *buffer;
     size_t size;

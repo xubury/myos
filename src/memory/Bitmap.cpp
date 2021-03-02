@@ -1,6 +1,7 @@
 #include "Bitmap.hpp"
 
 bool Bitmap::operator[](uint64_t index) {
+    if (index > size * 8) return false;
     uint64_t byteIndex = index / 8;
     uint8_t bitIndex = index % 8;
     // big endian
@@ -11,7 +12,8 @@ bool Bitmap::operator[](uint64_t index) {
         return false;
 }
 
-void Bitmap::set(uint64_t index, bool value) {
+bool Bitmap::set(uint64_t index, bool value) {
+    if (index > size * 8) return false;
     uint64_t byteIndex = index / 8;
     uint8_t bitIndex = index % 8;
     // big endian
@@ -20,4 +22,5 @@ void Bitmap::set(uint64_t index, bool value) {
     if (value) {
         buffer[byteIndex] |= bitIndexer;
     }
+    return true;
 }
