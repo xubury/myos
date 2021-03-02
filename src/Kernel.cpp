@@ -2,7 +2,7 @@
 #include "BootInfo.h"
 #include "EFIMemory.hpp"
 #include "Memory.hpp"
-#include "string.hpp"
+#include "String.hpp"
 
 extern "C" void _start(BootInfo *info) {
     BasicRenderer renderer(info->frameBuffer, info->psf1Font);
