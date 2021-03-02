@@ -182,7 +182,7 @@ efi_main(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE *systemTable) {
     BootInfo bootInfo;
     bootInfo.frameBuffer = frame;
     bootInfo.psf1Font = newFont;
-    bootInfo.map = map;
+    bootInfo.map = (EFIMemoryDescriptor *)map;
     bootInfo.mapSize = mapSize;
     bootInfo.mapDescriptorSize = descriptorSize;
 

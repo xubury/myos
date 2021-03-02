@@ -6,7 +6,7 @@
 
 class PageFrameAllocator {
    public:
-    void readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map, size_t mapSize,
+    void readEFIMemoryMap(EFIMemoryDescriptor *map, size_t mapSize,
                           size_t descriptorSize);
     void *requestPage();
 

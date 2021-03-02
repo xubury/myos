@@ -7,7 +7,7 @@ size_t PageFrameAllocator::reservedMemory;
 size_t PageFrameAllocator::usedMemory;
 bool PageFrameAllocator::initialized = false;
 
-void PageFrameAllocator::readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map,
+void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
                                           size_t mapSize,
                                           size_t descriptorSize) {
     if (initialized) return;
@@ -19,9 +19,9 @@ void PageFrameAllocator::readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map,
     void *maxFreeSegment = nullptr;
     size_t maxSize = 0;
     for (size_t i = 0; i < mapEntries; ++i) {
-        EFI_MEMORY_DESCRIPTOR *desc =
-            (EFI_MEMORY_DESCRIPTOR *)((uint64_t)map + (i * descriptorSize));
-        if (desc->Type == EfiConventionalMemory) {
+        EFIMemoryDescriptor *desc =
+            (EFIMemoryDescriptor *)((uint64_t)map + (i * descriptorSize));
+        if (desc->Type == EFIConventionalMemory) {
             if (desc->NumberOfPages * 4096 > maxSize) {
                 maxFreeSegment = (void *)desc->PhysicalStart;
                 maxSize = desc->NumberOfPages * 4096;
@@ -40,9 +40,9 @@ void PageFrameAllocator::readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map,
     lockPages(m_pageBitmap.buffer, m_pageBitmap.size / 4096 + 1);
 
     for (size_t i = 0; i < mapEntries; ++i) {
-        EFI_MEMORY_DESCRIPTOR *desc =
-            (EFI_MEMORY_DESCRIPTOR *)((uint64_t)map + (i * descriptorSize));
-        if (desc->Type != EfiConventionalMemory) {
+        EFIMemoryDescriptor *desc =
+            (EFIMemoryDescriptor *)((uint64_t)map + (i * descriptorSize));
+        if (desc->Type != EFIConventionalMemory) {
             reservePages((void *)desc->PhysicalStart, desc->NumberOfPages);
         }
     }
