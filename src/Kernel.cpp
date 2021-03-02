@@ -1,8 +1,7 @@
 #include "BasicRenderer.hpp"
 #include "Bitmap.hpp"
 #include "BootInfo.h"
-#include "EFIMemory.hpp"
-#include "Memory.hpp"
+#include "PageFrameAllocator.hpp"
 #include "String.hpp"
 
 extern "C" void _start(BootInfo *info) {
@@ -24,18 +23,25 @@ extern "C" void _start(BootInfo *info) {
     renderer.print(toHexString<float>(1.2));
     renderer.newLine();
 
-    renderer.print("Total memeory size: ");
+    renderer.print("Memeory size:\n");
     renderer.setColor(RGBA(255, 0, 0), RGBA());
-    uint64_t mapEntries = info->mapSize / info->mapDescriptorSize;
-    renderer.print(toString(
-        (float)getMemorySize(info->map, mapEntries, info->mapDescriptorSize) /
-        (1024 * 1024)));
+    PageFrameAllocator allocator;
+    allocator.readEFIMemoryMap(info->map, info->mapSize,
+                               info->mapDescriptorSize);
+    renderer.print("free: ");
+    renderer.print(toString((float)allocator.getFreeRAM() / (1024 * 1024)));
+    renderer.print(" MB\n");
+    renderer.print("used: ");
+    renderer.print(toString((float)allocator.getUsedRAM() / (1024 * 1024)));
+    renderer.print(" MB\n");
+    renderer.print("reserved: ");
+    renderer.print(toString((float)allocator.getReservedRAM() / (1024 * 1024)));
     renderer.print(" MB\n");
     renderer.setColor(RGBA(255, 255, 255), RGBA());
 
     uint8_t buffer[20] = {0};
     Bitmap bitmap;
-    bitmap.setBuffer(buffer, 20);
+    bitmap.buffer = buffer;
     bitmap.set(0, false);
     bitmap.set(1, true);
     bitmap.set(2, false);
