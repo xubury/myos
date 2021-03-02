@@ -8,6 +8,7 @@ class PageFrameAllocator {
    public:
     void readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map, size_t mapSize,
                           size_t descriptorSize);
+    void *requestPage();
 
     void freePage(void *addr);
     void lockPage(void *addr);
@@ -29,9 +30,9 @@ class PageFrameAllocator {
     void unreservePages(void *addr, size_t pageCnt);
 
     Bitmap m_pageBitmap;
-    static uint64_t freeMemory;
-    static uint64_t reservedMemory;
-    static uint64_t usedMemory;
+    static size_t freeMemory;
+    static size_t reservedMemory;
+    static size_t usedMemory;
     static bool initialized;
 };
 

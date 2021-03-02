@@ -1,8 +1,8 @@
 #include "PageFrameAllocator.hpp"
 
-uint64_t PageFrameAllocator::freeMemory;
-uint64_t PageFrameAllocator::reservedMemory;
-uint64_t PageFrameAllocator::usedMemory;
+size_t PageFrameAllocator::freeMemory;
+size_t PageFrameAllocator::reservedMemory;
+size_t PageFrameAllocator::usedMemory;
 bool PageFrameAllocator::initialized = false;
 
 void PageFrameAllocator::readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map,
@@ -44,6 +44,15 @@ void PageFrameAllocator::readEFIMemoryMap(EFI_MEMORY_DESCRIPTOR *map,
             reservePages((void *)desc->PhysicalStart, desc->NumberOfPages);
         }
     }
+}
+
+void *PageFrameAllocator::requestPage() {
+    for (size_t i = 0; i < m_pageBitmap.size * 8; ++i) {
+        if (m_pageBitmap[i]) continue;
+        lockPage((void *)(i * 4096));
+        return (void *)(i * 4096);
+    }
+    return nullptr;  // TODO:page frame swap
 }
 
 void PageFrameAllocator::initBitmap(void *bufferAddr, size_t bitmapSize) {

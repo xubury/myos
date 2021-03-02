@@ -23,9 +23,14 @@ extern "C" void _start(BootInfo *info) {
     renderer.print(toHexString<float>(1.2));
     renderer.newLine();
 
+    PageFrameAllocator allocator;
+    for (int i = 0; i < 20; ++i) {
+        void *addr = allocator.requestPage();
+        renderer.print(toHexString((uint64_t)addr));
+        renderer.print("\n");
+    }
     renderer.print("Memeory size:\n");
     renderer.setColor(RGBA(255, 0, 0), RGBA());
-    PageFrameAllocator allocator;
     allocator.readEFIMemoryMap(info->map, info->mapSize,
                                info->mapDescriptorSize);
     renderer.print("free: ");
