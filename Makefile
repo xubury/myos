@@ -15,7 +15,7 @@ export GNU_EFI_LINKER=$(LIB)/elf_x86_64_efi.lds
 export GNU_EFI_LIBS=-lgnuefi -lefi
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
-CXX_INCLUDES=$(GNU_EFI_INCLUDES) -Iboot -Isrc/common -Isrc/string
+CXX_INCLUDES=$(GNU_EFI_INCLUDES) -Iboot -Isrc/common -Isrc/string -Isrc/memory
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 kernel_source_files := $(shell find src -name *.cpp)
