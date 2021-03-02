@@ -21,10 +21,10 @@ void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
     for (size_t i = 0; i < mapEntries; ++i) {
         EFIMemoryDescriptor *desc =
             (EFIMemoryDescriptor *)((uint64_t)map + (i * descriptorSize));
-        if (desc->Type == EFIConventionalMemory) {
-            if (desc->NumberOfPages * 4096 > maxSize) {
-                maxFreeSegment = (void *)desc->PhysicalStart;
-                maxSize = desc->NumberOfPages * 4096;
+        if (desc->type == EFIConventionalMemory) {
+            if (desc->numberOfPages * 4096 > maxSize) {
+                maxFreeSegment = (void *)desc->physicalAddr;
+                maxSize = desc->numberOfPages * 4096;
             }
         }
     }
@@ -42,8 +42,8 @@ void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
     for (size_t i = 0; i < mapEntries; ++i) {
         EFIMemoryDescriptor *desc =
             (EFIMemoryDescriptor *)((uint64_t)map + (i * descriptorSize));
-        if (desc->Type != EFIConventionalMemory) {
-            reservePages((void *)desc->PhysicalStart, desc->NumberOfPages);
+        if (desc->type != EFIConventionalMemory) {
+            reservePages((void *)desc->physicalAddr, desc->numberOfPages);
         }
     }
 }

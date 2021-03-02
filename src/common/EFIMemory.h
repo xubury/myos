@@ -23,12 +23,12 @@ typedef enum {
 } EFIMemoryType;
 
 typedef struct {
-    uint32_t Type;  // Field size is 32 bits followed by 32 bit pad
-    uint32_t Pad;
-    uint64_t PhysicalStart;  // Field size is 64 bits
-    uint64_t VirtualStart;   // Field size is 64 bits
-    uint64_t NumberOfPages;  // Field size is 64 bits
-    uint64_t Attribute;      // Field size is 64 bits
+    uint32_t type;  // Field size is 32 bits followed by 32 bit pad
+    uint32_t pad;
+    uint64_t physicalAddr;   // Field size is 64 bits
+    uint64_t virtualAddr;    // Field size is 64 bits
+    uint64_t numberOfPages;  // Field size is 64 bits
+    uint64_t attribute;      // Field size is 64 bits
 } EFIMemoryDescriptor;
 
 extern const char* EFI_MEMORY_TYPE_STRINGS[];

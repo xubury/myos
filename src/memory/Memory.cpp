@@ -11,7 +11,7 @@ uint64_t getMemorySize(EFIMemoryDescriptor *map, uint64_t mapSize,
     for (uint64_t i = 0; i < entries; ++i) {
         EFIMemoryDescriptor *desc =
             (EFIMemoryDescriptor *)((uint64_t)map + (i * descriptorSize));
-        memoryBytes += (double)desc->NumberOfPages * 4096;
+        memoryBytes += (double)desc->numberOfPages * 4096;
     }
     return memoryBytes;
 }
