@@ -1,5 +1,7 @@
 #include "PageFrameAllocator.hpp"
 
+PageFrameAllocator g_PageFrameAllocator;
+
 size_t PageFrameAllocator::freeMemory;
 size_t PageFrameAllocator::reservedMemory;
 size_t PageFrameAllocator::usedMemory;

@@ -36,4 +36,6 @@ class PageFrameAllocator {
     static bool initialized;
 };
 
+extern PageFrameAllocator g_PageFrameAllocator;
+
 #endif

@@ -6,9 +6,6 @@
 
 extern char buffer[128];
 
-char* toString(double value, uint8_t decimalPlaces = 2);
-char* toString(float value, uint8_t decimalPlaces = 2);
-
 template <typename T>
 inline char* toString(T value) {
     uint8_t size = 0;
@@ -36,6 +33,10 @@ inline char* toString(T value) {
     buffer[size] = 0;
     return buffer;
 }
+
+char* toString(double value, uint8_t decimalPlaces = 2);
+
+char* toString(float value, uint8_t decimalPlaces = 2);
 
 template <typename T>
 inline char* toHexString(T value) {
