@@ -9,18 +9,28 @@ export kernel_elf=$(BUILD_DIR)/kernel.elf
 export font_file=$(ROOT_DIR)/zap-light16.psf
 export CC=gcc
 export LD=ld
+export ASMC=nasm
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
-CXX_INCLUDES=-Isrc/common -Isrc/string -Isrc/memory
+CXX_INCLUDES=-Isrc/common -Isrc/string -Isrc/memory -Isrc/gdt
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
+
+ASM_FLAGS=-f elf64
 
 kernel_source_files := $(shell find src -name *.cpp)
 kernel_header_files := $(shell find src -name *.hpp -or -name *.h)
 kernel_object_files := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(kernel_source_files))
 
+kernel_asm_files := $(shell find src -name *.asm)
+kernel_object_files += $(patsubst %.asm, $(BUILD_DIR)/%_asm.o, $(kernel_asm_files))
+
 $(BUILD_DIR)/%.o : %.cpp $(kernel_header_files)
 	mkdir -p $(dir $@) && \
 	$(CC) $(CXX_FLAGS) $(CXX_INCLUDES) $(patsubst $(BUILD_DIR)/%.o, %.cpp, $@) -o $@
+
+$(BUILD_DIR)/%_asm.o : %.asm
+	mkdir -p $(dir $@) && \
+	$(ASMC) $(ASM_FLAGS) $^ -o $@
 
 link: $(kernel_object_files)
 	$(LD) $(LD_FLAGS) -o $(kernel_elf) $(kernel_object_files)

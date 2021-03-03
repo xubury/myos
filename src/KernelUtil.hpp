@@ -4,6 +4,7 @@
 #include "BasicRenderer.hpp"
 #include "Bitmap.hpp"
 #include "BootInfo.h"
+#include "GDT.hpp"
 #include "PageFrameAllocator.hpp"
 #include "PageTableManager.hpp"
 #include "Paging.hpp"

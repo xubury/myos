@@ -31,6 +31,10 @@ void KernelManager::prepareMemory() {
 }
 
 void KernelManager::initKernel() {
+    GDTDescriptor gdtDescriptor;
+    gdtDescriptor.size = sizeof(GDT) - 1;
+    gdtDescriptor.offset = (uint64_t)&defaultGDT;
+    loadGDT(&gdtDescriptor);
     prepareMemory();
     m_renderer.init(m_bootInfo->frameBuffer, m_bootInfo->psf1Font);
     m_renderer.print("Kernel initialized successfully!\n");
