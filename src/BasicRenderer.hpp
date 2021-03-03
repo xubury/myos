@@ -46,7 +46,8 @@ class BasicRenderer {
 
     BasicRenderer();
 
-    void init(FrameBuffer* frameBuffer, PSF1Font* fontBuffer);
+    void init(FrameBuffer* frameBuffer, PSF1Font* fontBuffer, uint32_t x,
+              uint32_t y, RGBA foreground, RGBA background);
 
     void setPixel(uint32_t x, uint32_t y, RGBA color);
     RGBA getPixel(uint32_t x, uint32_t y);

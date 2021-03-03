@@ -5,6 +5,7 @@
 #include "Bitmap.hpp"
 #include "BootInfo.h"
 #include "GDT.hpp"
+#include "IDT.hpp"
 #include "PageFrameAllocator.hpp"
 #include "PageTableManager.hpp"
 #include "Paging.hpp"
@@ -15,8 +16,8 @@ extern uint64_t _kernelEnd;
 
 class KernelManager {
    public:
-    KernelManager(BootInfo* info);
-    void initKernel();
+    KernelManager();
+    void initKernel(BootInfo* info);
 
     BasicRenderer& renderer() { return m_renderer; }
 
@@ -27,11 +28,16 @@ class KernelManager {
 
    private:
     void prepareMemory();
+    void prepareInterrupts();
 
     PageTableManager m_pageTableManager;
     BootInfo* m_bootInfo;
 
     BasicRenderer m_renderer;
+
+    IDTR m_idtr;
 };
+
+extern KernelManager g_manager;
 
 #endif

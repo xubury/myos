@@ -1,21 +1,21 @@
+#include "Interrupt.hpp"
 #include "KernelUtil.hpp"
 
-KernelManager::KernelManager(BootInfo *info)
-    : m_pageTableManager(nullptr), m_bootInfo(info) {
-    initKernel();
-}
+KernelManager g_manager;
+
+KernelManager::KernelManager() : m_pageTableManager(nullptr) {}
 
 void KernelManager::prepareMemory() {
     g_PageFrameAllocator.readEFIMemoryMap(m_bootInfo->map, m_bootInfo->mapSize,
                                           m_bootInfo->mapDescriptorSize);
     uint64_t kernelSize = (uint64_t)&_kernelEnd - (uint64_t)&_kernelStart;
     uint64_t kernelPages = (uint64_t)kernelSize / 4096 + 1;
-
     g_PageFrameAllocator.lockPages(&_kernelStart, kernelPages);
-    PageTable *p4Table = (PageTable *)g_PageFrameAllocator.requestPage();
 
+    PageTable *p4Table = (PageTable *)g_PageFrameAllocator.requestPage();
     memset(p4Table, 0, 0x1000);
-    m_pageTableManager = PageTableManager(p4Table);
+    m_pageTableManager.m_p4Addr = p4Table;
+
     size_t memorySize = getMemorySize(m_bootInfo->map, m_bootInfo->mapSize,
                                       m_bootInfo->mapDescriptorSize);
     for (uint64_t i = 0; i < memorySize; i += 0x1000) {
@@ -30,14 +30,31 @@ void KernelManager::prepareMemory() {
     asm("mov %0, %%cr3" : : "r"(p4Table));
 }
 
-void KernelManager::initKernel() {
+void KernelManager::prepareInterrupts() {
+    m_idtr.limit = 0x0FFF;
+    m_idtr.offset = (uint64_t)g_PageFrameAllocator.requestPage();
+
+    IDTDescEntry *intPageFault =
+        (IDTDescEntry *)(m_idtr.offset + 0xE * sizeof(IDTDescEntry));
+    intPageFault->setOffset((uint64_t)pageFaultHandler);
+    intPageFault->typeAttribute = IDT_TA_InterruptGate;
+    intPageFault->selector = 0x08;
+
+    asm("lidt %0" : : "m"(m_idtr));
+}
+
+void KernelManager::initKernel(BootInfo *info) {
+    m_bootInfo = info;
+    prepareMemory();
     GDTDescriptor gdtDescriptor;
     gdtDescriptor.size = sizeof(GDT) - 1;
     gdtDescriptor.offset = (uint64_t)&defaultGDT;
     loadGDT(&gdtDescriptor);
-    prepareMemory();
-    m_renderer.init(m_bootInfo->frameBuffer, m_bootInfo->psf1Font);
+    m_renderer.init(m_bootInfo->frameBuffer, m_bootInfo->psf1Font, 0, 0,
+                    RGBA(255, 255, 255), RGBA());
+    m_renderer.clearScreen();
     m_renderer.print("Kernel initialized successfully!\n");
+    prepareInterrupts();
 }
 
 void KernelManager::printMemory() {

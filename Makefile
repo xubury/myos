@@ -12,7 +12,7 @@ export LD=ld
 export ASMC=nasm
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
-CXX_INCLUDES=-Isrc/common -Isrc/string -Isrc/memory -Isrc/gdt
+CXX_INCLUDES=-Isrc -Isrc/common -Isrc/string -Isrc/memory -Isrc/gdt -Isrc/interrupt
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 ASM_FLAGS=-f elf64
@@ -23,6 +23,11 @@ kernel_object_files := $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(kernel_source_files
 
 kernel_asm_files := $(shell find src -name *.asm)
 kernel_object_files += $(patsubst %.asm, $(BUILD_DIR)/%_asm.o, $(kernel_asm_files))
+
+$(BUILD_DIR)/src/interrupt/Interrupt.o: src/interrupt/Interrupt.cpp
+	mkdir -p $(dir $@) && \
+	$(CC) -mno-red-zone -mgeneral-regs-only \
+	$(CXX_FLAGS) $(CXX_INCLUDES) $(patsubst $(BUILD_DIR)/%.o, %.cpp, $@) -o $@
 
 $(BUILD_DIR)/%.o : %.cpp $(kernel_header_files)
 	mkdir -p $(dir $@) && \

@@ -4,10 +4,15 @@ uint8_t BasicRenderer::bytesPerPixel = 4;
 
 BasicRenderer::BasicRenderer() : m_frame(nullptr), m_font(nullptr) {}
 
-void BasicRenderer::init(FrameBuffer *frameBuffer, PSF1Font *fontBuffer) {
+void BasicRenderer::init(FrameBuffer *frameBuffer, PSF1Font *fontBuffer,
+                         uint32_t x, uint32_t y, RGBA foreground,
+                         RGBA background) {
     m_frame = frameBuffer;
     m_font = fontBuffer;
-    clearScreen();
+    m_cursor.x = x;
+    m_cursor.y = y;
+    m_cursor.foregoundColor = foreground;
+    m_cursor.backgoundColor = background;
 }
 
 void BasicRenderer::setPixel(uint32_t x, uint32_t y, RGBA color) {
