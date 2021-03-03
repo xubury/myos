@@ -44,7 +44,9 @@ class BasicRenderer {
    public:
     static uint8_t bytesPerPixel;
 
-    BasicRenderer(FrameBuffer* frameBuffer, PSF1Font* fontBuffer);
+    BasicRenderer();
+
+    void init(FrameBuffer* frameBuffer, PSF1Font* fontBuffer);
 
     void setPixel(uint32_t x, uint32_t y, RGBA color);
     RGBA getPixel(uint32_t x, uint32_t y);
