@@ -3,18 +3,30 @@
 
 #include <stdint.h>
 
-struct PageDirectoryEntry {
-    bool present : 1;
-    bool readWrite : 1;
-    bool userSuper : 1;
-    bool writeThrough : 1;
-    bool cacheDisabled : 1;
-    bool accessed : 1;
-    bool ignore0 : 1;
-    bool largerPages : 1;
-    bool ignore1 : 1;
-    uint8_t available : 3;
-    uint64_t addr : 52;
+enum PTFlag {
+    Present = 0,
+    ReadWrite = 1,
+    UserSuper = 2,
+    WriteThrough = 3,
+    CacheDisabled = 4,
+    Accessed = 5,
+    LargerPages = 7,
+    Custom0 = 9,
+    Custom1 = 10,
+    Custom2 = 11,
+    NX = 63
+};
+
+class PageDirectoryEntry {
+   public:
+    void setFlag(PTFlag flag, bool enabled);
+    bool getFlag(PTFlag flag);
+
+    void setAddr(uint64_t addr);
+    uint64_t getAddr();
+
+   private:
+    uint64_t m_value;
 };
 
 struct PageTable {
