@@ -34,6 +34,7 @@ class PageFrameAllocator {
     static size_t reservedMemory;
     static size_t usedMemory;
     static bool initialized;
+    static size_t pageBitmapIndex;
 };
 
 extern PageFrameAllocator g_PageFrameAllocator;

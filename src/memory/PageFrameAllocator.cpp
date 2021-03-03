@@ -6,6 +6,7 @@ size_t PageFrameAllocator::freeMemory;
 size_t PageFrameAllocator::reservedMemory;
 size_t PageFrameAllocator::usedMemory;
 bool PageFrameAllocator::initialized = false;
+size_t PageFrameAllocator::pageBitmapIndex = 0;
 
 void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
                                           size_t mapSize,
@@ -49,10 +50,10 @@ void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
 }
 
 void *PageFrameAllocator::requestPage() {
-    for (size_t i = 0; i < m_pageBitmap.size * 8; ++i) {
-        if (m_pageBitmap[i]) continue;
-        lockPage((void *)(i * 4096));
-        return (void *)(i * 4096);
+    for (; pageBitmapIndex < m_pageBitmap.size * 8; ++pageBitmapIndex) {
+        if (m_pageBitmap[pageBitmapIndex]) continue;
+        lockPage((void *)(pageBitmapIndex * 4096));
+        return (void *)(pageBitmapIndex * 4096);
     }
     return nullptr;  // TODO:page frame swap
 }
@@ -74,6 +75,7 @@ void PageFrameAllocator::freePage(void *addr) {
     if (m_pageBitmap.set(index, false)) {
         freeMemory += 4096;
         usedMemory -= 4096;
+        if (pageBitmapIndex > index) pageBitmapIndex = index;
     }
 }
 
@@ -108,6 +110,7 @@ void PageFrameAllocator::unreservePage(void *addr) {
     if (m_pageBitmap.set(index, true)) {
         freeMemory += 4096;
         reservedMemory -= 4096;
+        if (pageBitmapIndex > index) pageBitmapIndex = index;
     }
 }
 
