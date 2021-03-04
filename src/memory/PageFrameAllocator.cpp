@@ -1,13 +1,5 @@
 #include "PageFrameAllocator.hpp"
 
-PageFrameAllocator g_PageFrameAllocator;
-
-size_t PageFrameAllocator::freeMemory;
-size_t PageFrameAllocator::reservedMemory;
-size_t PageFrameAllocator::usedMemory;
-bool PageFrameAllocator::initialized = false;
-size_t PageFrameAllocator::pageBitmapIndex = 0;
-
 void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
                                           size_t mapSize,
                                           size_t descriptorSize) {
@@ -92,11 +84,11 @@ void PageFrameAllocator::lockPage(void *addr) {
 
 void PageFrameAllocator::reservePage(void *addr) {
     uint64_t index = (uint64_t)addr / 4096;
-    if (m_pageBitmap[index] == false) {
+    if (m_pageBitmap[index] == true) {
         return;
     }
 
-    if (m_pageBitmap.set(index, false)) {
+    if (m_pageBitmap.set(index, true)) {
         freeMemory -= 4096;
         reservedMemory += 4096;
     }
@@ -104,10 +96,10 @@ void PageFrameAllocator::reservePage(void *addr) {
 
 void PageFrameAllocator::unreservePage(void *addr) {
     uint64_t index = (uint64_t)addr / 4096;
-    if (m_pageBitmap[index] == true) {
+    if (m_pageBitmap[index] == false) {
         return;
     }
-    if (m_pageBitmap.set(index, true)) {
+    if (m_pageBitmap.set(index, false)) {
         freeMemory += 4096;
         reservedMemory -= 4096;
         if (pageBitmapIndex > index) pageBitmapIndex = index;

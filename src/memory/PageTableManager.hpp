@@ -5,7 +5,6 @@
 
 class PageTableManager {
    public:
-    PageTableManager(PageTable *p4Addr);
     PageTable *m_p4Addr;
     void mapMemory(void *virtualMemory, void *physicalMemory);
 };

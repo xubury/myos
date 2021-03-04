@@ -16,7 +16,6 @@ extern uint64_t _kernelEnd;
 
 class KernelManager {
    public:
-    KernelManager();
     void initKernel(BootInfo* info);
 
     BasicRenderer& renderer() { return m_renderer; }
@@ -38,6 +37,7 @@ class KernelManager {
     IDTR m_idtr;
 };
 
-extern KernelManager g_manager;
+extern KernelManager& manager();
+extern PageFrameAllocator& allocator();
 
 #endif

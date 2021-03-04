@@ -1,8 +1,7 @@
+#include "KernelUtil.hpp"
 #include "Memory.hpp"
 #include "PageFrameAllocator.hpp"
 #include "PageTableManager.hpp"
-
-PageTableManager::PageTableManager(PageTable *p4Addr) : m_p4Addr(p4Addr) {}
 
 void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     PageMapIndexer indexer((uint64_t)virtualMemory);
@@ -10,7 +9,7 @@ void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     PageDirectoryEntry pDE = m_p4Addr->entries[indexer.pDPIndex];
     PageTable *pDP;
     if (!pDE.getFlag(Present)) {
-        pDP = (PageTable *)g_PageFrameAllocator.requestPage();
+        pDP = (PageTable *)allocator().requestPage();
         memset(pDP, 0, 0x1000);
         pDE.setAddr((uint64_t)pDP >> 12);
         pDE.setFlag(Present, true);
@@ -23,7 +22,7 @@ void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     pDE = pDP->entries[indexer.pDIndex];
     PageTable *pD;
     if (!pDE.getFlag(Present)) {
-        pD = (PageTable *)g_PageFrameAllocator.requestPage();
+        pD = (PageTable *)allocator().requestPage();
         memset(pD, 0, 0x1000);
         pDE.setAddr((uint64_t)pD >> 12);
         pDE.setFlag(Present, true);
@@ -36,7 +35,7 @@ void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     pDE = pD->entries[indexer.pTIndex];
     PageTable *pT;
     if (!pDE.getFlag(Present)) {
-        pT = (PageTable *)g_PageFrameAllocator.requestPage();
+        pT = (PageTable *)allocator().requestPage();
         memset(pT, 0, 0x1000);
         pDE.setAddr((uint64_t)pT >> 12);
         pDE.setFlag(Present, true);

@@ -30,13 +30,11 @@ class PageFrameAllocator {
     void unreservePages(void *addr, size_t pageCnt);
 
     Bitmap m_pageBitmap;
-    static size_t freeMemory;
-    static size_t reservedMemory;
-    static size_t usedMemory;
-    static bool initialized;
-    static size_t pageBitmapIndex;
+    size_t freeMemory;
+    size_t reservedMemory;
+    size_t usedMemory;
+    bool initialized;
+    size_t pageBitmapIndex;
 };
-
-extern PageFrameAllocator g_PageFrameAllocator;
 
 #endif
