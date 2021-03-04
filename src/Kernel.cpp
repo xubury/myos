@@ -13,6 +13,5 @@ extern "C" void _start(BootInfo *info) {
     manager().testPageIndexer();
     manager().printMemory();
 
-    asm("int $0x8");
-    asm("hlt");
+    while (true) asm("hlt");
 }

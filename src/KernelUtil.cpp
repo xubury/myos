@@ -1,3 +1,4 @@
+#include "IO.hpp"
 #include "Interrupt.hpp"
 #include "KernelUtil.hpp"
 
@@ -39,22 +40,35 @@ void KernelManager::prepareInterrupts() {
     m_idtr.limit = 0x0FFF;
     m_idtr.offset = (uint64_t)pageFrameAllocator().requestPage();
 
-    IDTDescEntry *intPageFault =
+    IDTDescEntry *idtEntry =
         (IDTDescEntry *)(m_idtr.offset + 0xE * sizeof(IDTDescEntry));
-    intPageFault->setOffset((uint64_t)pageFaultHandler);
-    intPageFault->typeAttribute = IDT_TA_InterruptGate;
-    intPageFault->selector = 0x08;
+    idtEntry->setOffset((uint64_t)pageFaultHandler);
+    idtEntry->typeAttribute = IDT_TA_InterruptGate;
+    idtEntry->selector = 0x08;
 
-    intPageFault = (IDTDescEntry *)(m_idtr.offset + 0x8 * sizeof(IDTDescEntry));
-    intPageFault->setOffset((uint64_t)doubleFaultHandler);
-    intPageFault->typeAttribute = IDT_TA_InterruptGate;
-    intPageFault->selector = 0x08;
+    idtEntry = (IDTDescEntry *)(m_idtr.offset + 0x8 * sizeof(IDTDescEntry));
+    idtEntry->setOffset((uint64_t)doubleFaultHandler);
+    idtEntry->typeAttribute = IDT_TA_InterruptGate;
+    idtEntry->selector = 0x08;
 
-    intPageFault = (IDTDescEntry *)(m_idtr.offset + 0xD * sizeof(IDTDescEntry));
-    intPageFault->setOffset((uint64_t)gPFaultHandler);
-    intPageFault->typeAttribute = IDT_TA_InterruptGate;
-    intPageFault->selector = 0x08;
+    idtEntry = (IDTDescEntry *)(m_idtr.offset + 0xD * sizeof(IDTDescEntry));
+    idtEntry->setOffset((uint64_t)gPFaultHandler);
+    idtEntry->typeAttribute = IDT_TA_InterruptGate;
+    idtEntry->selector = 0x08;
+
+    idtEntry = (IDTDescEntry *)(m_idtr.offset + 0x21 * sizeof(IDTDescEntry));
+    idtEntry->setOffset((uint64_t)keyboardHandler);
+    idtEntry->typeAttribute = IDT_TA_InterruptGate;
+    idtEntry->selector = 0x08;
+
     asm("lidt %0" : : "m"(m_idtr));
+
+    remapPIC(0x20, 0x28);
+
+    outb(PIC1_DATA, 0b11111101);
+    outb(PIC2_DATA, 0b11111111);
+
+    asm("sti");
 }
 
 void KernelManager::initKernel(BootInfo *info) {

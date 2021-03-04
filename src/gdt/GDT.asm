@@ -14,4 +14,4 @@ loadGDT:
 	mov rax, 0x08 ;kernel code segment
 	push rax
 	push rdi
-	ret
+	retfq
