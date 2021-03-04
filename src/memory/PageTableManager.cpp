@@ -5,11 +5,12 @@
 
 void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     PageMapIndexer indexer((uint64_t)virtualMemory);
+    PageFrameAllocator &pageFrameAllocator = manager().pageFrameAllocator();
 
     PageDirectoryEntry pDE = m_p4Addr->entries[indexer.pDPIndex];
     PageTable *pDP;
     if (!pDE.getFlag(Present)) {
-        pDP = (PageTable *)allocator().requestPage();
+        pDP = (PageTable *)pageFrameAllocator.requestPage();
         memset(pDP, 0, 0x1000);
         pDE.setAddr((uint64_t)pDP >> 12);
         pDE.setFlag(Present, true);
@@ -22,7 +23,7 @@ void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     pDE = pDP->entries[indexer.pDIndex];
     PageTable *pD;
     if (!pDE.getFlag(Present)) {
-        pD = (PageTable *)allocator().requestPage();
+        pD = (PageTable *)pageFrameAllocator.requestPage();
         memset(pD, 0, 0x1000);
         pDE.setAddr((uint64_t)pD >> 12);
         pDE.setFlag(Present, true);
@@ -35,7 +36,7 @@ void PageTableManager::mapMemory(void *virtualMemory, void *physicalMemory) {
     pDE = pD->entries[indexer.pTIndex];
     PageTable *pT;
     if (!pDE.getFlag(Present)) {
-        pT = (PageTable *)allocator().requestPage();
+        pT = (PageTable *)pageFrameAllocator.requestPage();
         memset(pT, 0, 0x1000);
         pDE.setAddr((uint64_t)pT >> 12);
         pDE.setFlag(Present, true);

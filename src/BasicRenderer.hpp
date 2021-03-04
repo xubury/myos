@@ -44,8 +44,6 @@ class BasicRenderer {
    public:
     static uint8_t bytesPerPixel;
 
-    BasicRenderer();
-
     void init(FrameBuffer* frameBuffer, PSF1Font* fontBuffer, uint32_t x,
               uint32_t y, RGBA foreground, RGBA background);
 
@@ -66,6 +64,9 @@ class BasicRenderer {
     void clearScanline(uint32_t y, RGBA color);
 
    private:
+    friend class KernelManager;
+    BasicRenderer();
+
     FrameBuffer* m_frame;
     PSF1Font* m_font;
     Cursor m_cursor;

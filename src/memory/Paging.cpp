@@ -22,6 +22,7 @@ void PageDirectoryEntry::setAddr(uint64_t addr) {
 uint64_t PageDirectoryEntry::getAddr() {
     return (m_value & 0x000ffffffffff000) >> 12;
 }
+
 PageMapIndexer::PageMapIndexer(uint64_t virtualAddr) {
     virtualAddr >>= 12;
     pIndex = virtualAddr & 0x1ff;

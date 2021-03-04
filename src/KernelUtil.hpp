@@ -18,8 +18,8 @@ class KernelManager {
    public:
     void initKernel(BootInfo* info);
 
-    BasicRenderer& renderer() { return m_renderer; }
-
+    BasicRenderer& renderer();
+    PageFrameAllocator& pageFrameAllocator();
     void printMemory();
     void testString();
     void testBitmap();
@@ -29,15 +29,15 @@ class KernelManager {
     void prepareMemory();
     void prepareInterrupts();
 
-    PageTableManager m_pageTableManager;
     BootInfo* m_bootInfo;
 
-    BasicRenderer m_renderer;
+    PageFrameAllocator m_pageFrameAllocator;
+    PageTableManager m_pageTableManager;
 
+    BasicRenderer m_renderer;
     IDTR m_idtr;
 };
 
 extern KernelManager& manager();
-extern PageFrameAllocator& allocator();
 
 #endif

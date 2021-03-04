@@ -1,20 +1,23 @@
 #include "Interrupt.hpp"
 #include "KernelUtil.hpp"
 
+BasicRenderer &KernelManager::renderer() { return m_renderer; }
+
+PageFrameAllocator &KernelManager::pageFrameAllocator() {
+    return m_pageFrameAllocator;
+}
+
 KernelManager g_manager;
 KernelManager &manager() { return g_manager; }
 
-PageFrameAllocator g_PageFrameAllocator;
-PageFrameAllocator &allocator() { return g_PageFrameAllocator; }
-
 void KernelManager::prepareMemory() {
-    allocator().readEFIMemoryMap(m_bootInfo->map, m_bootInfo->mapSize,
-                                 m_bootInfo->mapDescriptorSize);
+    pageFrameAllocator().readEFIMemoryMap(m_bootInfo->map, m_bootInfo->mapSize,
+                                          m_bootInfo->mapDescriptorSize);
     uint64_t kernelSize = (uint64_t)&_kernelEnd - (uint64_t)&_kernelStart;
     uint64_t kernelPages = (uint64_t)kernelSize / 4096 + 1;
-    allocator().lockPages(&_kernelStart, kernelPages);
+    pageFrameAllocator().lockPages(&_kernelStart, kernelPages);
 
-    PageTable *p4Table = (PageTable *)allocator().requestPage();
+    PageTable *p4Table = (PageTable *)pageFrameAllocator().requestPage();
     memset(p4Table, 0, 0x1000);
     m_pageTableManager.m_p4Addr = p4Table;
 
@@ -34,7 +37,7 @@ void KernelManager::prepareMemory() {
 
 void KernelManager::prepareInterrupts() {
     m_idtr.limit = 0x0FFF;
-    m_idtr.offset = (uint64_t)allocator().requestPage();
+    m_idtr.offset = (uint64_t)pageFrameAllocator().requestPage();
 
     IDTDescEntry *intPageFault =
         (IDTDescEntry *)(m_idtr.offset + 0xE * sizeof(IDTDescEntry));
@@ -63,14 +66,16 @@ void KernelManager::printMemory() {
     m_renderer.print("\nMemory:\n");
     m_renderer.setColor(RGBA(255, 0, 0), RGBA());
     m_renderer.print("Free:");
-    m_renderer.print(toString((float)allocator().getFreeRAM() / (1024 * 1024)));
+    m_renderer.print(
+        toString((float)pageFrameAllocator().getFreeRAM() / (1024 * 1024)));
     m_renderer.print(" MB\n");
     m_renderer.print("Used:");
-    m_renderer.print(toString((float)allocator().getUsedRAM() / (1024 * 1024)));
+    m_renderer.print(
+        toString((float)pageFrameAllocator().getUsedRAM() / (1024 * 1024)));
     m_renderer.print(" MB\n");
     m_renderer.print("Reserved:");
     m_renderer.print(
-        toString((float)allocator().getReservedRAM() / (1024 * 1024)));
+        toString((float)pageFrameAllocator().getReservedRAM() / (1024 * 1024)));
     m_renderer.print(" MB\n");
     m_renderer.setColor(RGBA(255, 255, 255), RGBA());
 }

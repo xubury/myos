@@ -1,5 +1,12 @@
 #include "PageFrameAllocator.hpp"
 
+PageFrameAllocator::PageFrameAllocator()
+    : freeMemory(0),
+      reservedMemory(0),
+      usedMemory(0),
+      initialized(false),
+      pageBitmapIndex(0) {}
+
 void PageFrameAllocator::readEFIMemoryMap(EFIMemoryDescriptor *map,
                                           size_t mapSize,
                                           size_t descriptorSize) {

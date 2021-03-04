@@ -21,6 +21,9 @@ class PageFrameAllocator {
     size_t getReservedRAM();
 
    private:
+    friend class KernelManager;
+    PageFrameAllocator();
+
     void initBitmap(void *bufferAddr, size_t bitmapSize);
 
     void reservePage(void *addr);
