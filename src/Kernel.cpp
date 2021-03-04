@@ -14,6 +14,5 @@ extern "C" void _start(BootInfo *info) {
     manager().printMemory();
 
     asm("int $0x0e");
-    while (true)
-        ;
+    asm("hlt");
 }

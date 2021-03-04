@@ -3,6 +3,5 @@
 
 __attribute__((interrupt)) void pageFaultHandler(interrupt_frame *) {
     manager().renderer().print("Page fault detected\n");
-    while (true)
-        ;
+    asm("hlt");
 }
