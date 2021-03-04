@@ -61,9 +61,10 @@ class BasicRenderer {
 
     void setColor(RGBA foreground, RGBA background);
 
-    void clearScanline(uint32_t y, RGBA color);
+    void setCurosr(uint32_t x, uint32_t y);
 
    private:
+    void clearScanline(uint32_t y, RGBA color);
     friend class KernelManager;
     BasicRenderer();
 

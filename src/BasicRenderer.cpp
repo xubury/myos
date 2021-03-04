@@ -9,10 +9,8 @@ void BasicRenderer::init(FrameBuffer *frameBuffer, PSF1Font *fontBuffer,
                          RGBA background) {
     m_frame = frameBuffer;
     m_font = fontBuffer;
-    m_cursor.x = x;
-    m_cursor.y = y;
-    m_cursor.foregoundColor = foreground;
-    m_cursor.backgoundColor = background;
+    setCurosr(x, y);
+    setColor(foreground, background);
 }
 
 void BasicRenderer::setPixel(uint32_t x, uint32_t y, RGBA color) {
@@ -94,4 +92,9 @@ void BasicRenderer::clearScreen(RGBA color) {
 void BasicRenderer::setColor(RGBA foreground, RGBA background) {
     m_cursor.foregoundColor = foreground;
     m_cursor.backgoundColor = background;
+}
+
+void BasicRenderer::setCurosr(uint32_t x, uint32_t y) {
+    m_cursor.x = x;
+    m_cursor.y = y;
 }
