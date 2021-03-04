@@ -45,6 +45,15 @@ void KernelManager::prepareInterrupts() {
     intPageFault->typeAttribute = IDT_TA_InterruptGate;
     intPageFault->selector = 0x08;
 
+    intPageFault = (IDTDescEntry *)(m_idtr.offset + 0x8 * sizeof(IDTDescEntry));
+    intPageFault->setOffset((uint64_t)doubleFaultHandler);
+    intPageFault->typeAttribute = IDT_TA_InterruptGate;
+    intPageFault->selector = 0x08;
+
+    intPageFault = (IDTDescEntry *)(m_idtr.offset + 0xD * sizeof(IDTDescEntry));
+    intPageFault->setOffset((uint64_t)gPFaultHandler);
+    intPageFault->typeAttribute = IDT_TA_InterruptGate;
+    intPageFault->selector = 0x08;
     asm("lidt %0" : : "m"(m_idtr));
 }
 
