@@ -1,3 +1,4 @@
+#include "KernelUtil.hpp"
 #include "Keyboard.hpp"
 
 bool isLeftShiftPressed;
