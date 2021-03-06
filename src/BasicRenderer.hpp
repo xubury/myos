@@ -15,8 +15,11 @@ class BasicRenderer {
     void setPixel(uint32_t x, uint32_t y, RGBA color);
     RGBA getPixel(uint32_t x, uint32_t y);
 
+    void putChar(char character);
     void putChar(char character, uint32_t xOff, uint32_t yOff, RGBA foreground,
                  RGBA background);
+
+    void backSapce(uint32_t cnt);
 
     void print(const char* str);
     void newLine();

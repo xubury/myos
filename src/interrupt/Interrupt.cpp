@@ -1,6 +1,7 @@
 #include "IO.hpp"
 #include "Interrupt.hpp"
 #include "KernelUtil.hpp"
+#include "Keyboard.hpp"
 #include "Panic.hpp"
 
 __attribute__((interrupt)) void pageFaultHandler(InterruptFrame *) {
@@ -17,10 +18,8 @@ __attribute__((interrupt)) void gPFaultHandler(InterruptFrame *) {
 }
 
 __attribute__((interrupt)) void keyboardHandler(InterruptFrame *) {
-    manager().renderer().print("Pressed: ");
     uint8_t scanCode = inb(0x60);
-    manager().renderer().print(toString(scanCode));
-    manager().renderer().newLine();
+    handleKeyboard(scanCode);
     picEndMaster();
 }
 

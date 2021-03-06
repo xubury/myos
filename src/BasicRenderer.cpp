@@ -25,12 +25,22 @@ RGBA BasicRenderer::getPixel(uint32_t x, uint32_t y) {
                                bytesPerPixel * x)));
 }
 
+void BasicRenderer::putChar(char character) {
+    putChar(character, m_cursor.x, m_cursor.y, m_cursor.foregoundColor,
+            m_cursor.backgoundColor);
+    uint8_t charSize = m_font->header->characterSize;
+    m_cursor.x += charSize / 2;
+    if (m_cursor.x + charSize / 2 > m_frame->width) {
+        newLine();
+    }
+}
+
 void BasicRenderer::putChar(char character, uint32_t xOff, uint32_t yOff,
                             RGBA foreground, RGBA background) {
     uint8_t charSize = m_font->header->characterSize;
     char *fontPtr = (char *)m_font->glyphBuffer + (character * charSize);
     for (uint32_t y = yOff; y < yOff + charSize; ++y) {
-        for (uint32_t x = xOff; x < xOff + 8; ++x) {
+        for (uint32_t x = xOff; x < xOff + charSize / 2; ++x) {
             if ((*fontPtr & (0b10000000) >> (x - xOff)) > 0) {
                 setPixel(x, y, foreground);
             } else {
@@ -41,18 +51,26 @@ void BasicRenderer::putChar(char character, uint32_t xOff, uint32_t yOff,
     }
 }
 
+void BasicRenderer::backSapce(uint32_t cnt) {
+    if (m_cursor.x == 0) return;
+    uint8_t charSize = m_font->header->characterSize;
+    if (cnt * charSize / 2 > m_cursor.x) {
+        cnt = m_cursor.x / charSize * 2;
+    }
+    for (uint32_t y = 0; y < charSize; ++y) {
+        for (uint32_t x = 0; x < charSize * cnt / 2; ++x) {
+            setPixel(m_cursor.x - x, m_cursor.y + y, m_cursor.backgoundColor);
+        }
+    }
+    m_cursor.x -= cnt * charSize / 2;
+}
 void BasicRenderer::print(const char *str) {
     for (const char *ch = str; *ch != '\0'; ++ch) {
         if (*ch == '\n') {
             newLine();
             continue;
         }
-        putChar(*ch, m_cursor.x, m_cursor.y, m_cursor.foregoundColor,
-                m_cursor.backgoundColor);
-        m_cursor.x += 8;
-        if (m_cursor.x + 8 > m_frame->width) {
-            newLine();
-        }
+        putChar(*ch);
     }
 }
 

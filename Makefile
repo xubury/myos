@@ -13,7 +13,7 @@ export ASMC=nasm
 
 CXX_FLAGS=-c -ffreestanding -fshort-wchar -Wall -Wextra -Wundef -pedantic -std=c++17
 CXX_INCLUDES=-Isrc -Isrc/common -Isrc/math -Isrc/string -Isrc/memory \
-			 -Isrc/gdt -Isrc/interrupt
+			 -Isrc/gdt -Isrc/interrupt -Isrc/keyboard
 LD_FLAGS=-T kernel.ld  -static -Bsymbolic -nostdlib
 
 ASM_FLAGS=-f elf64
